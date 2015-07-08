@@ -1,0 +1,14 @@
+LISTS: 
+1 teacher A B D C
+2 learner B C A D
+3 teacher C D B A
+4 learner D A C B
+5 teacher B C A D
+6 learner A B D C
+7 teacher D A C B
+8 learner C D B A
+
+WORDS: 'blicket', 'tupa', 'wug', 'fep'
+
+run run 7 learner and 1 teacher
+lists: teacher 1, learner: 4-2, 6-3, 8-2
