@@ -1,0 +1,358 @@
+<html>
+    
+    <head>
+        <title>Experiment</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+        <script src="mmturkey.js"></script>
+        <script src="raphael.js"></script>
+        <script src="ajax.js"></script>
+        <link rel="stylesheet" href="style.css" />
+        <meta name="viewport" content="initial-scale=1.0" />
+    </head>
+    
+    <body>
+    
+        <!--INSTRUCTIONS SLIDE-->
+        <div class="slide" id="instructions">
+            <img src="images/stanford.png" alt="Stanford University">
+            <p id='logo-text'>Stanford Language and Cognition Lab</p>
+            <p class="block-text">This experiment is about learning about objects. Click the Start button
+                to begin.</p>
+            <button type="button" onClick="this.blur(); experiment.next()">Start</button>
+            <p class="block-text" id="legal">By answering the following questions, you are participating in a study
+                being performed by cognitive scientists in the Stanford Department of Psychology.
+                If you have questions about this research, please contact us at
+                <a href="mailto://languagecoglab@gmail.com.">languagecoglab@gmail.com</a>. You must be at least 18 years old to participate. Your participation
+                in this research is voluntary. You may decline to answer any or all of
+                the following questions. You may decline further participation, at any
+                time, without adverse consequences. Your anonymity is assured; the researchers
+                who have requested your participation will not receive any personal information
+                about you.</p>
+        </div>
+        
+        <!--INSTRUCTIONS SLIDE #2-->
+        <div class="slide" id="instructions2">
+             <div>
+				  <table align="center">
+					<tr>
+						<td align="center"><img  src="images/teacher.png" width="115"/>' 
+
+					</tr>
+				</table>
+                <table align="center">
+                		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td id="inst_line0"></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td id="inst_line1"></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                     	<tr>   <td id="inst_line2"></td></tr>
+                     	<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                     	<tr>   <td id="inst_line3"></td></tr>
+                      	<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                      	<tr>   <td id="inst_line4"></td></tr>
+                      	<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                     	<tr>   <td id="inst_line5"></td></tr>
+                        <tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                      	<tr>   <td id="inst_line6"></td></tr>
+                        <tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   		<tr> 	<td ></td> </tr>
+                   
+                </table>
+            </div>
+            <div id="button2"></div>
+        </div>
+        
+        <!--MAIN SLIDE #1-TRAINING_LEARNER-->
+        <div class="slide" id="train_learner">
+        <table align="center">
+					<tr>
+						<td align="center"><img  src="images/teacher.png" width="90" />' 
+
+					</tr>
+		</table>
+
+		<div id="ajaxBusy" style="display:none"><p><img src="images/ajax-loader.gif"></p></div>
+		<div>
+			<table align="center">
+				<tr>
+					<td id="learn_inst"></td>
+				</tr>
+			</table>
+		</div>
+					<HR>
+            <br>
+            <br>
+            <div id="wt1"></div>
+            <br>
+            <br>
+            <br>
+            <table align="center">
+                <tr>
+                    <td>
+                        <button id="learnerNext" style="display:none" type="button" onClick="this.blur();experiment.select()">Next</button>
+                    </td>
+                </tr>
+            </table>
+            <table align="center">
+                <tr>
+                    <td id="qt_message"></td>
+                </tr>
+            </table>
+        </div>
+        
+        <!--MAIN SLIDE #2-TRAINING_TEACHER-->
+        <div class="slide" id="train_teacher">
+        
+            <table align="center">
+					<tr>
+						<td align="center"><img  src="images/teacher.png" width="90"/>' 
+
+					</tr>
+				</table>
+				<div id="ajaxBusy" style="display:none"><p><img src="images/ajax-loader.gif"></p></div>
+            <div>
+                <table align="center">
+                    <tr>
+                        <td id="teach_inst"></td>
+                    </tr>
+                </table>
+                
+            </div>
+            <HR>
+      
+            <div id="wt2"></div>
+			 <br>
+            <br>
+            <table align="center">
+                <tr>
+                    <td id="teach_button"></td>
+                </tr>
+            </table>
+        </div>
+        
+        <!--MAIN SLIDE #3-Train_Across-->
+        <div class="slide" id="trainacross">
+            <br>
+            <!--QUESTION (dynamically built in javascript)-->
+            <div>
+                <table align="center">
+                    <tr>
+                        <div id="testQ7"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <!--PICTURE (dynamically built in javascript)-->
+            <div>
+                <table align="center">
+                    <tr>
+                        <td>
+                            <div id="testP7"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <br>
+            <br>
+            <table align="center">
+                <tr>
+                    <td>
+                        <button type="button" onClick="this.blur();experiment.select()">Next</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <!--MAIN SLIDE #5-TEST-->
+        <div class="slide" id="test">
+            <table align="center">
+					<tr>
+						<td align="center"><img  src="images/teacher.png" width="80"/>' 
+						<td <div id="testHeader"></div> </td>
+					</tr>
+			</table>
+          
+            <div id="testdisplay"></div>
+            <div id="breaks" ></div>
+            <!--QUESTION (dynamically built in javascript)-->
+            <div>
+                <table align="center">
+                    <tr>
+                        <div id="testQ"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <!--PICTURE (dynamically built in javascript)-->
+            <div>
+                <table align="center">
+                    <tr>
+                        <td>
+                            <div id="testP"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <!--FORM-->
+            <div id="wrap">
+                <form>
+                    <br>
+                    <br>
+                    <input type="radio" name="testQuestion" id="yes">yes</input>
+                    <br>
+                    <input type="radio" name="testQuestion" id="no">no</input>
+                </form>
+            </div>
+            <br>
+            <table align="center">
+                <tr>
+                    <td id="qmessage"></td>
+                </tr>
+            </table>
+            <table align="center">
+                <tr>
+                    <td>
+                        <button type="button" onClick="this.blur();experiment.select()">Next</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <!--QUESTION SLIDE-->
+        <div class="slide" id="qslide"> 
+        <p <b> Please answer the following questions: </b> </p>
+			<form>
+				<p>1. What was the kind of object you learned about?
+					<br>
+					<br>
+					<input type="radio" name="Q1" id="a"> wug
+					</input>
+					<br>
+					<input type="radio" name="Q1" id="b"> fep
+					</input>
+					<br>
+					<input type="radio" name="Q1" id="c"> tupa
+					</input>
+					<br>
+					<input type="radio" name="Q1" id="d"> blicket
+					</input>
+					<br>
+					<br>
+					<br>
+				</p>
+			</form>
+				<form>
+				<p>2. Did you learn about this kind of object?
+					<br>
+					<br>
+					<table align="left">
+                    <tr>
+                        <td>
+                            <div id="Q2display"></div>
+                        </td>
+                    </tr>
+                </table>
+                    <br>
+                    <br>
+                    <input type="radio" name="Q2" id="yes">yes</input>
+                    <br>
+                    <input type="radio" name="Q2" id="no">no</input>
+					<br>
+					<br>
+					<br>
+				</p>
+			</form>
+				<form>
+			<form>
+				<p>3. Did you learn about this kind of object?
+					<br>
+					<br>
+					<table align="left">
+                    <tr>
+                        <td>
+                            <div id="Q3display"></div>
+                        </td>
+                    </tr>
+                </table>
+                    <br>
+                    <br>
+                    <input type="radio" name="Q3" id="yes">yes</input>
+                    <br>
+                    <input type="radio" name="Q3" id="no">no</input>
+					<br>
+					<br>
+					<br>
+				</p>
+			</form>
+				<form>
+				<p>4. Did you learn about this kind of object?
+					<br>
+					<br>
+					<table align="left">
+                    <tr>
+                        <td>
+                            <div id="Q4display"></div>
+                        </td>
+                    </tr>
+                </table>
+                    <br>
+                    <br>
+                    <input type="radio" name="Q4" id="yes">yes</input>
+                    <br>
+                    <input type="radio" name="Q4" id="no">no</input>
+					<br>
+					<br>
+					<br>
+				</p>
+			</form>
+<br>
+					<br>
+		
+				
+			<table cellspacing="1" align="center">
+				<tr>
+					<div id="qmessage2"></div>
+				</tr>
+			</table>
+			
+			
+			<br>
+			<br>
+			<form>
+				<input type="button" name="Finish" value="Finish" onclick="this.blur();experiment.select()">
+				</p>
+			</form>
+			</div>
+        
+        <!--FINISHED SLIDE-->
+        <div class="slide " id="finished ">You're finished - thanks for participating! Submitting to Mechanical Turk...</div>
+        <script
+        src="wug7.js"></script>
+    </body>
+
+</html>
