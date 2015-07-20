@@ -32,7 +32,7 @@ opts_chunk$set(cache = F, warning = F, message = F)
 library(boot)
 library(ggplot2)
 library(plyr)
-source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
+#source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
 
 getPs <- function(d, dv){ 
   # get proportions
