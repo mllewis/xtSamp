@@ -333,7 +333,6 @@ chisq.test(d2_counts)
 
 ```{r}
 l1 <- read.csv("../data/inlab_replication.csv")
-
 #proper <- l1$basic1_a == 0 & l1$basic2_a == 0 & 
  # l1$basic1_b == 0 & l1$basic2_b == 0 & 
  # (l1$sub1_a == 0 | l1$sub2_a == 0 | l1$sub1_b == 0 | l1$sub2_b == 0)
