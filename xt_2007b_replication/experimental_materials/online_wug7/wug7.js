@@ -1,8 +1,8 @@
 // WUG Experiment 6
 // Overview: (i) Helper (ii) Parameters (iii) Control Flow
 // Condtion equalizer filename and counts
-var filename = "MLL_wug6"
-var condCounts = "1,75;2,75" //Example: "1,20;2,20;3,20"
+var filename = "MLL_wug7"
+var condCounts = "1,50;2,50" //Example: "1,20;2,20;3,20"
 
 // ---------------- HELPER ------------------
 function random(a, b) {
