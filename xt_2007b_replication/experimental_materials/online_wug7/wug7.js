@@ -60,8 +60,8 @@ xmlHttp = new XMLHttpRequest();
 xmlHttp.open( "GET", "http://langcog.stanford.edu/cgi-bin/subject_equalizer/maker_getter.php?conds=" + condCounts +"&filename=" + filename, false );
 xmlHttp.send( null );
 var cond = xmlHttp.responseText;
-//var cond = random(2) + 1; // (1-2)
-var cond=2
+var cond = random(2) + 1; // (1-2)
+//var cond=1
 
 
 
