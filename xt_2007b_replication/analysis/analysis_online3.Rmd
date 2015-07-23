@@ -1,0 +1,13 @@
+---
+output: html_document
+---
+
+<h2> Xu and Tenenbaum 2007b Replication </h2>
+====
+`r as.character(format(Sys.Date(), format="%B %d, %Y"))`
+======
+
+
+***
+***
+
