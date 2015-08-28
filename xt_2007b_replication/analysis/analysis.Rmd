@@ -405,12 +405,12 @@ d3$w.ans.cat <- factor(d3$w.ans.cat,c("proper","sub","basic","other"))
 d3 = d3[d3$w.ans.cat != "other",]
 
 # get proportions and bootstrapped CIS
-M2 <- data.frame()
+M3 <- data.frame()
 for (k in 1:length(levels(d3$w.ans.cat))){
-    M2 = rbind(M2, ddply(d3, .(Answer.sample), 
+    M3 = rbind(M3, ddply(d3, .(Answer.sample), 
                      function (d) {getPs(d$w.ans.cat, levels(d$w.ans.cat)[k])}))
 }
-M2$exp = "Turk #3"
+M3$exp = "Turk #3"
 ```
 
 Plot.
@@ -445,10 +445,6 @@ chisq.test(d3_counts)
 ```
 
 
-
-```
-
-
 <a name="l1"/>
 <h3> In Lab Replication </h3>
 
@@ -472,23 +468,20 @@ l1$ans.cat[basic] <- "basic"
 l1$ans.cat <- factor(l1$ans.cat,c("proper","sub","basic","other"))
 l1 = l1[l1$ans.cat != "other",]
 # get proportions and bootstrapped CIS
-M3 <- data.frame()
+M4 <- data.frame()
 for (k in 1:length(levels(l1$ans.cat))){
-    M3 = rbind(M3, ddply(l1, .(sample), 
+    M4 = rbind(M4, ddply(l1, .(sample), 
                      function (d) {getPs(d$ans.cat, levels(d$ans.cat)[k])}))
 }
 
-M3$exp = "In Lab"
-
+M4$exp = "In Lab"
 ```
 
 
 Plot.
-
-
 ```{r, echo=F}
 # plot
-ggplot(data=M3[M3$dv == "basic" | M3$dv == "sub",], aes(x=factor(dv), y=p, fill=sample)) +
+ggplot(data=M4[M4$dv == "basic" | M4$dv == "sub",], aes(x=factor(dv), y=p, fill=sample)) +
   geom_bar(stat="identity", position=position_dodge()) +
   geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
   ylim(0,1) +
@@ -535,12 +528,12 @@ xt_data$sample[1:14] = "teacher"
 xt_data$sample[15:28] = "learner"
 
 # get proportions and bootstrapped CIS
-M4 <- data.frame()
+M5 <- data.frame()
 for (k in 1:length(levels(learner_xt_data))){
-  M4 = rbind(M4, ddply(xt_data, .(sample), 
+  M5 = rbind(M5, ddply(xt_data, .(sample), 
                      function (d) {getPs(d$response, levels(d$response)[k])}))
 }
-M4$exp = "X&T (2007b)"
+M5$exp = "X&T (2007b)"
 
 ```
 
@@ -571,9 +564,10 @@ Plot of all experiments
 ```{r, fig.width = 10, echo = F}
 names(M)[1] = "sample"
 names(M2)[1] = "sample"
-allM = rbind(M, M2, M3, M4)
+names(M3)[1] = "sample"
+allM = rbind(M, M2, M3, M4, M5)
 
-allM$exp <- ordered(as.factor(allM$exp), levels = c( "X&T (2007b)", "Turk #1" ,"Turk #2", "In Lab"  ))
+allM$exp <- ordered(as.factor(allM$exp), levels = c( "X&T (2007b)", "Turk #1" ,"Turk #2","Turk #3", "In Lab"))
 
 ggplot(data=allM[allM$dv == "basic" | allM$dv == "sub",], 
        aes(x=factor(dv), y=p, fill=sample)) +
@@ -620,11 +614,4 @@ ggplot(es, aes(x = exp, y =effect_size, ymin = cill, ymax = ciul)) +
   ggtitle("Effect sizes")
 
 ```
-
-
-
-
-
-
-
 
