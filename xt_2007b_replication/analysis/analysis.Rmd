@@ -8,11 +8,11 @@ output: html_document
 ***
 
 **TABLE OF CONTENTS**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(1) Original Xu and Tenenabum 2007b ](#o)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(1) Xu and Tenenabum 2007b (original)](#o)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(2) Exp. 1 - online](#t1)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(3) Exp. 2 - online ](#t2)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(3) Exp. 2 - online](#t2)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(4) Exp. 3 - in person](#l1)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) Exp. 4 - online ](#t3)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) Exp. 4 - online](#t3)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) All](#all)** <br/>
 
 
@@ -58,7 +58,6 @@ themeML = theme(text = element_text(size=fs),
                 panel.border = element_blank(),
                 axis.line = element_line(color = 'black')) 
 
-
 d.fc <- function(response, cond) {
 
   # http://www.meta-analysis.com/downloads/Meta-analysis%20Converting%20among%20effect%20sizes.pdf
@@ -89,32 +88,45 @@ d.fc <- function(response, cond) {
 
 opts_chunk$set(echo = T, message = F, warning = F, error = F, cache = F)
 
+
+```
+
+There are two different criteria possible for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently. 
+```{r, echo = F}
 # include proper generalizations?
-strict = F
-proper = F # this only affects plots
+strict = FALSE
+proper = FALSE # this only affects plots
+
+print(paste("Strict criteria: ", strict))
 ```
 
 <a name="o"/>
 <h3> Original Xu and Tenenbaum 2007b </h3>
 
-X&T 2007b data
+X&T 2007b data - adults
 ```{r}
-# ADULTS
-n_responses = 14 # N=7/condition, 2 responses/participant
+N = 14
+N_per_condition = N/2 # 7/condition
+n_responses = 8 # per participant [(2 sub + 2 basic) x 2 trials]
+total_n_responses_per_condition = n_responses * N_per_condition
 
 prop_sub_teacher= .928 
-n_sub_teacher = round(prop_sub_teacher * n_responses)
-n_basic_teacher = n_responses - n_sub_teacher 
-teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher), rep("basic", n_basic_teacher)))
+n_sub_teacher = round(prop_sub_teacher * total_n_responses_per_condition)
+n_basic_teacher = total_n_responses_per_condition - n_sub_teacher 
+teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher),
+                              rep("basic", n_basic_teacher)))
 
 prop_sub_learner = .357
-n_sub_learner = round(prop_sub_learner * n_responses)
-n_basic_learner= n_responses - n_sub_learner
-learner_xt_data = as.factor(c(rep("sub", n_sub_learner), rep("basic", n_basic_learner)))
+n_sub_learner = round(prop_sub_learner * total_n_responses_per_condition)
+n_basic_learner= total_n_responses_per_condition - n_sub_learner
+learner_xt_data = as.factor(c(rep("sub", n_sub_learner), 
+                              rep("basic", n_basic_learner)))
 
-xt_data.adults = data.frame(response=c(as.character(teacher_xt_data),as.character(learner_xt_data)))
-xt_data.adults$Answer.sample[1:14] = "teacher"
-xt_data.adults$Answer.sample[15:28] = "learner"
+xt_data.adults = data.frame(response=c(as.character(teacher_xt_data),
+                                       as.character(learner_xt_data)))
+xt_data.adults$Answer.sample[1:total_n_responses_per_condition] = "teacher"
+xt_data.adults$Answer.sample[(total_n_responses_per_condition+1):
+                               (total_n_responses_per_condition*2)] = "learner"
 
 # get proportions and bootstrapped CIS
 M <- data.frame()
@@ -136,26 +148,32 @@ xt.a.props[xt.a.props$Answer.sample == "learner" &
            xt.a.props$w.ans.cat == "sub", "n" ] = n_sub_learner 
 xt.a.props[xt.a.props$Answer.sample == "learner" & 
            xt.a.props$w.ans.cat == "basic", "n" ] = n_basic_learner 
+```
 
-# CHILDREN
-n_responses = 24 # N=12/condition, 2 responses/participant
+X&T 2007b data - children
+```{r}
+N = 24
+N_per_condition = N/2 # 12/condition
+n_responses = 8 # per participant [(2 sub + 2 basic) x 2 trials]
+total_n_responses_per_condition = n_responses * N_per_condition
 
 prop_sub_teacher= .71
-n_sub_teacher = round(prop_sub_teacher * n_responses)
-n_basic_teacher = n_responses - n_sub_teacher 
+n_sub_teacher = round(prop_sub_teacher * total_n_responses_per_condition)
+n_basic_teacher = total_n_responses_per_condition - n_sub_teacher 
 teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher),
                               rep("basic", n_basic_teacher)))
 
 prop_sub_learner = .29
-n_sub_learner = round(prop_sub_learner * n_responses)
-n_basic_learner= n_responses - n_sub_learner
+n_sub_learner = round(prop_sub_learner * total_n_responses_per_condition)
+n_basic_learner= total_n_responses_per_condition - n_sub_learner
 learner_xt_data = as.factor(c(rep("sub", n_sub_learner), 
                               rep("basic", n_basic_learner)))
 
 xt_data.children = data.frame(response=c(as.character(teacher_xt_data),
-                                         as.character(learner_xt_data)))
-xt_data.children$Answer.sample[1:24] = "teacher"
-xt_data.children$Answer.sample[25:48] = "learner"
+                                       as.character(learner_xt_data)))
+xt_data.children$Answer.sample[1:total_n_responses_per_condition] = "teacher"
+xt_data.children$Answer.sample[(total_n_responses_per_condition+1):
+                               (total_n_responses_per_condition*2)] = "learner"
 
 # get proportions and bootstrapped CIS
 M <- data.frame()
@@ -179,7 +197,6 @@ xt.c.props[xt.c.props$Answer.sample == "learner" &
            xt.c.props$w.ans.cat== "basic", "n" ] = n_basic_learner 
 ```
 
-Plot.
 ```{r, echo = F}
 xt = rbind(xt.c.props, xt.a.props)
 xt$exp = revalue(xt$exp,c("X&T (2007b) children" = "children",
@@ -228,7 +245,8 @@ t1.exclusion.ns
 t1.f = t1 %>%
        filter(Answer.label == 'label') %>% #remove nolabel trials (run 4)
        filter(!duplicated(workerid)) %>% #participants who completed multiple runs
-       filter(Answer.click1 == "\"correct\"" & Answer.click2 == "\"correct\"") %>% #correct training items (learning only)
+       filter(Answer.click1 == "\"correct\"" & 
+                Answer.click2 == "\"correct\"") %>% #correct training items (learning only)
        filter(Answer.Qwcheck == 0)  %>% #check generalization question
        filter(Answer.question1 == 'TRUE') #filter question
 
@@ -283,7 +301,6 @@ t1.f.props = t1.f %>%
           left_join(M)
 ```
 
-Plot.
 ```{r, echo = F}
 ggplot(t1.f.props, aes(x=factor(w.ans.cat), y=prop, fill=Answer.sample)) +
   geom_bar(stat="identity", position=position_dodge()) +
@@ -394,7 +411,6 @@ t2.f.props = t2.f %>%
           left_join(M)
 ```
 
-Plot.
 ```{r, echo=F}
 ggplot(t2.f.props, aes(x = factor(w.ans.cat), y = prop, fill = Answer.sample)) +
   geom_bar(stat ="identity", position = position_dodge()) +
@@ -494,9 +510,12 @@ l1.f.props = l1.f %>%
           mutate(prop = n / sum(n),
                  exp = "In Lab") %>%
           left_join(M)
+
+# re-order levels so consistent with other exps
+l1.f.props$Answer.sample <- ordered(l1.f.props$Answer.sample, 
+                    levels = c("teacher", "learner"))
 ```
 
-Plot.
 ```{r, echo = F}
 ggplot(l1.f.props, aes(x=factor(w.ans.cat), y = prop, fill = Answer.sample)) +
   geom_bar(stat="identity", position=position_dodge()) +
@@ -506,7 +525,6 @@ ggplot(l1.f.props, aes(x=factor(w.ans.cat), y = prop, fill = Answer.sample)) +
   xlab("Generalization pattern") +
   ggtitle("In Lab") +
   themeML + 
-  theme(legend.position=c(.85,.8)) + 
   scale_fill_brewer(name="Sampling\nCondition", palette="Set1")
 ```
 
@@ -546,7 +564,7 @@ t3.f= t3 %>%
       filter(Answer.question1 == 'TRUE' & Answer.question2 =='TRUE' & 
             Answer.question3 == 'TRUE' & Answer.question4 =='TRUE')  # take out those who missed filter question
 
-dim(t2)[1] # total
+dim(t3)[1] # total
 dim(t3.f)[1] # total with exclusions
 ```
 
@@ -606,7 +624,6 @@ t3.f.props = t3.f %>%
           left_join(M)
 ```
 
-Plot.
 ```{r}
 ggplot(t3.f.props, aes(x=factor(w.ans.cat), y=prop, fill=Answer.sample)) +
   geom_bar(stat="identity", position=position_dodge()) +
@@ -618,7 +635,6 @@ ggplot(t3.f.props, aes(x=factor(w.ans.cat), y=prop, fill=Answer.sample)) +
   themeML + 
   theme(legend.position=c(.85,.8)) + 
     scale_fill_brewer(name="Sampling\nCondition", palette="Set1")
-
 ```
 
 Stats
@@ -637,10 +653,10 @@ lf.props$ps.boot <- NULL
 all.props= rbind(lf.props, xt.a.props)
 
 all.props$exp <- ordered(as.factor(all.props$exp), 
-                    levels = c( "X&T (2007b) adults", "Turk #1", 
+                    levels = c( "X&T (2007b)", "Turk #1", 
                                 "Turk #2", "In Lab", "Turk #3"))
 
-all.props$exp = revalue(all.props$exp, c("X&T (2007b) adults" = "X&T (2007b)", "Turk #1" = "Exp. 1",
+all.props$exp = revalue(all.props$exp, c("X&T (2007b)" = "X&T (2007b)", "Turk #1" = "Exp. 1",
                                 "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", "Turk #3" = "Exp. 4"))
 
 all.props$w.ans.cat  = revalue(all.props$w.ans.cat , c("sub" = "sub."))
@@ -691,4 +707,6 @@ ggplot(all.es, aes(x = exp, y = effect_size, ymin = cill, ymax = ciul)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 #dev.off()
 ```
+
+# how to calculate errors bars -- XT do it over responses, I'm doing it over participants
 
