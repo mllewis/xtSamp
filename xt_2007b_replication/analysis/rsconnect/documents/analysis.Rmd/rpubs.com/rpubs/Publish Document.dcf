@@ -2,6 +2,7 @@ name: Publish Document
 account: rpubs
 server: rpubs.com
 bundleId:
-        https://api.rpubs.com/api/v1/document/93485/48708b54107f456cb1f1aaa9941d5b8d
-url: http://rpubs.com/MarleneA28/93485
-when: 1440618442.66838
+        https://api.rpubs.com/api/v1/document/107333/0ec06f4d5df54c96930a2626dec8e34c
+url:
+        http://rpubs.com/publish/claim/107333/97db2914d59b4af0a274c2bbbd283335
+when: 1441489498.4674
