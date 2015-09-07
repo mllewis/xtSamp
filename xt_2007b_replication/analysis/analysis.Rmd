@@ -87,11 +87,10 @@ d.fc <- function(response, cond) {
 }
 
 opts_chunk$set(echo = T, message = F, warning = F, error = F, cache = F)
-
-
 ```
 
-There are two different criteria possible for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently. 
+There are different possible criteria  for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently across questions as either a subordinate or a basic generalizer for each of the two trials. In contrast, in our sample, we observed a wide variety of responses across questions by participants. Thus, we adopt two criteria in analyzing our data: a "strict" criteria where we only include participants if they responded correctly, and a "non-strict" criteria where we counted a particpant as a basic generalizer if they responded "yes" to any of the basic level questions. 
+
 ```{r, echo = F}
 # include proper generalizations?
 strict = FALSE
@@ -106,27 +105,25 @@ print(paste("Strict criteria: ", strict))
 X&T 2007b data - adults
 ```{r}
 N = 14
-N_per_condition = N/2 # 7/condition
-n_responses = 8 # per participant [(2 sub + 2 basic) x 2 trials]
-total_n_responses_per_condition = n_responses * N_per_condition
+N_per_condition = (N/2) * 2 # 7/condition
 
 prop_sub_teacher= .928 
-n_sub_teacher = round(prop_sub_teacher * total_n_responses_per_condition)
-n_basic_teacher = total_n_responses_per_condition - n_sub_teacher 
+n_sub_teacher = round(prop_sub_teacher * N_per_condition)
+n_basic_teacher = N_per_condition - n_sub_teacher 
 teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher),
                               rep("basic", n_basic_teacher)))
 
 prop_sub_learner = .357
-n_sub_learner = round(prop_sub_learner * total_n_responses_per_condition)
-n_basic_learner= total_n_responses_per_condition - n_sub_learner
+n_sub_learner = round(prop_sub_learner * N_per_condition)
+n_basic_learner= N_per_condition - n_sub_learner
 learner_xt_data = as.factor(c(rep("sub", n_sub_learner), 
                               rep("basic", n_basic_learner)))
 
 xt_data.adults = data.frame(response=c(as.character(teacher_xt_data),
                                        as.character(learner_xt_data)))
-xt_data.adults$Answer.sample[1:total_n_responses_per_condition] = "teacher"
-xt_data.adults$Answer.sample[(total_n_responses_per_condition+1):
-                               (total_n_responses_per_condition*2)] = "learner"
+xt_data.adults$Answer.sample[1:N_per_condition] = "teacher"
+xt_data.adults$Answer.sample[(N_per_condition+1):
+                              (N_per_condition*2)] = "learner"
 
 # get proportions and bootstrapped CIS
 M <- data.frame()
@@ -153,27 +150,25 @@ xt.a.props[xt.a.props$Answer.sample == "learner" &
 X&T 2007b data - children
 ```{r}
 N = 24
-N_per_condition = N/2 # 12/condition
-n_responses = 8 # per participant [(2 sub + 2 basic) x 2 trials]
-total_n_responses_per_condition = n_responses * N_per_condition
+N_per_condition = (N/2) * 2 # 12/condition, 2 trials per participant
 
 prop_sub_teacher= .71
-n_sub_teacher = round(prop_sub_teacher * total_n_responses_per_condition)
-n_basic_teacher = total_n_responses_per_condition - n_sub_teacher 
+n_sub_teacher = round(prop_sub_teacher * N_per_condition)
+n_basic_teacher = N_per_condition - n_sub_teacher 
 teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher),
                               rep("basic", n_basic_teacher)))
 
 prop_sub_learner = .29
-n_sub_learner = round(prop_sub_learner * total_n_responses_per_condition)
-n_basic_learner= total_n_responses_per_condition - n_sub_learner
+n_sub_learner = round(prop_sub_learner * N_per_condition)
+n_basic_learner= N_per_condition - n_sub_learner
 learner_xt_data = as.factor(c(rep("sub", n_sub_learner), 
                               rep("basic", n_basic_learner)))
 
 xt_data.children = data.frame(response=c(as.character(teacher_xt_data),
                                        as.character(learner_xt_data)))
-xt_data.children$Answer.sample[1:total_n_responses_per_condition] = "teacher"
-xt_data.children$Answer.sample[(total_n_responses_per_condition+1):
-                               (total_n_responses_per_condition*2)] = "learner"
+xt_data.children$Answer.sample[1:N_per_condition] = "teacher"
+xt_data.children$Answer.sample[(N_per_condition+1):
+                               (2*N_per_condition)] = "learner"
 
 # get proportions and bootstrapped CIS
 M <- data.frame()
@@ -201,6 +196,9 @@ xt.c.props[xt.c.props$Answer.sample == "learner" &
 xt = rbind(xt.c.props, xt.a.props)
 xt$exp = revalue(xt$exp,c("X&T (2007b) children" = "children",
                           "X&T (2007b)" = "adults"))
+# re-order levels so consistent with other exps
+xt$Answer.sample <- ordered(xt$Answer.sample, 
+                    levels = c("teacher", "learner"))
 
 ggplot(xt, aes(x=factor(w.ans.cat), y=prop, fill=Answer.sample)) +
   facet_grid(. ~ exp) +
@@ -702,8 +700,8 @@ ggplot(all.es, aes(x = exp, y = effect_size, ymin = cill, ymax = ciul)) +
   geom_pointrange(position=position_dodge(width = 0.25), size = .8) + 
   ylab("Effect Size") + 
   xlab("Experiment") + 
-  geom_hline(y=0, linetype = "dotted") +
-  theme(text=element_text(size=14)) +
+  geom_hline(y = 0, linetype = "dotted") +
+  theme(text = element_text(size=14)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 #dev.off()
 ```

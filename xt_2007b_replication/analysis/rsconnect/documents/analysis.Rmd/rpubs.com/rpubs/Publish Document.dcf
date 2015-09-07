@@ -3,6 +3,5 @@ account: rpubs
 server: rpubs.com
 bundleId:
         https://api.rpubs.com/api/v1/document/107333/0ec06f4d5df54c96930a2626dec8e34c
-url:
-        http://rpubs.com/publish/claim/107333/97db2914d59b4af0a274c2bbbd283335
-when: 1441489498.4674
+url: http://rpubs.com/mll/107333
+when: 1441563879.25299
