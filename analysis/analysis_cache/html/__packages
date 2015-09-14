@@ -1,0 +1,14 @@
+base
+boot
+ggplot2
+plyr
+knitr
+rmarkdown
+bootstrap
+Matrix
+Rcpp
+lme4
+stringr
+plotrix
+reshape2
+car
