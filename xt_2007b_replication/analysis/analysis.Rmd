@@ -670,7 +670,7 @@ ggplot(all.props.crit, aes(x = w.ans.cat, y = prop, fill = Answer.sample)) +
   geom_bar(stat="identity", position = position_dodge()) +
   facet_grid(. ~ exp) +
   geom_rect(data = all.props.crit[17:24,], fill = "gray", 
-            xmin = -Inf,xmax = Inf, ymin = -Inf,ymax = Inf, alpha = 0.05) +
+            xmin = -Inf,xmax = Inf, ymin = -Inf,ymax = Inf, alpha = 0.07) +
   geom_linerange(aes(ymin = ciwl,ymax = ciul), position=position_dodge(.9)) +
   ylim(0, 1) +
   ylab("Prop. Participants") +
@@ -690,7 +690,7 @@ xt.a.es = d.fc(xt_data.adults$response, xt_data.adults$Answer.sample)
 xt.c.es = d.fc(xt_data.children$response, xt_data.children$Answer.sample)
 
 all.es = rbind(t1.f.es, t2.f.es, t3.f.es, l1.f.es, xt.a.es, xt.c.es)
-all.es$exp = c("Turk #1" ,"Turk #2", "Turk #3", "In Lab",
+all.es$exp = c("Turk #1" ,"Turk #2", "Turk #3", "In Lab" ,
                "X&T adults", "X&T children")
 all.es$exp<- ordered(as.factor(all.es$exp), 
                      levels = c( "X&T children", "X&T adults", "Turk #1" ,"Turk #2", 
@@ -712,5 +712,3 @@ ggplot(all.es, aes(x = exp, y = effect_size, ymin = cill, ymax = ciul)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 #dev.off()
 ```
-
-
