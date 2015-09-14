@@ -16,7 +16,7 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) All](#all)** <br/>
 
 
-This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_LF.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
+This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
 
 ***
 ***
