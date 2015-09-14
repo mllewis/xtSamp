@@ -105,7 +105,8 @@ print(paste("Strict criteria: ", strict))
 X&T 2007b data - adults
 ```{r}
 N = 14
-N_per_condition = (N/2) * 2 # 7/condition
+N_per_condition = (N/2) #* 2 #2 conditions and 2 trials per participant per condition
+# Note: We are aggegating across *trials* not participants -- Though not consistent with the descprition in the original report, this is necessary to assume in order to get the proportions they report.
 
 prop_sub_teacher= .928 
 n_sub_teacher = round(prop_sub_teacher * N_per_condition)
@@ -150,7 +151,7 @@ xt.a.props[xt.a.props$Answer.sample == "learner" &
 X&T 2007b data - children
 ```{r}
 N = 24
-N_per_condition = (N/2) * 2 # 12/condition, 2 trials per participant
+N_per_condition = (N/2) #* 2 # 12/condition, 2 trials per participant
 
 prop_sub_teacher= .71
 n_sub_teacher = round(prop_sub_teacher * N_per_condition)
@@ -230,7 +231,7 @@ Filter.
 ```{r}
 # get number of exclusions by category
 t1.exclusion.ns = t1 %>%
-              summarise(n_noLabelTrials = length(which(Answer.label != 'label')),
+              summarise(n_noLabelParticipants = length(which(Answer.label != 'label')),
                         n_repeatWorkers = length(which(duplicated(workerid))),
                         n_badTraining = length(which(Answer.click1 == "\"false\"" | 
                                                        Answer.click2 == "\"false\"")),
@@ -241,7 +242,7 @@ t1.exclusion.ns
 
 # subset data
 t1.f = t1 %>%
-       filter(Answer.label == 'label') %>% #remove nolabel trials (run 4)
+       filter(Answer.label == 'label') %>% #remove nolabel participants (run 4)
        filter(!duplicated(workerid)) %>% #participants who completed multiple runs
        filter(Answer.click1 == "\"correct\"" & 
                 Answer.click2 == "\"correct\"") %>% #correct training items (learning only)
@@ -249,6 +250,7 @@ t1.f = t1 %>%
        filter(Answer.question1 == 'TRUE') #filter question
 
 dim(t1)[1] # total
+dim(t1)[1] - t1.exclusion.ns[1,"n_noLabelParticipants"] - t1.exclusion.ns[1,"n_repeatWorkers"] # actual total
 dim(t1.f)[1] # total with exclusions
 ```
 
@@ -623,16 +625,16 @@ t3.f.props = t3.f %>%
 ```
 
 ```{r}
-ggplot(t3.f.props, aes(x=factor(w.ans.cat), y=prop, fill=Answer.sample)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+ggplot(t3.f.props, aes(x = factor(w.ans.cat), y = prop, fill = Answer.sample)) +
+  geom_bar(stat = "identity", position=position_dodge()) +
+  geom_linerange(aes(ymin = ciwl,ymax = ciul), position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
   ggtitle("Turk Replication #3") +
   themeML + 
-  theme(legend.position=c(.85,.8)) + 
-    scale_fill_brewer(name="Sampling\nCondition", palette="Set1")
+  theme(legend.position = c(.85,.8)) + 
+    scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
 Stats
@@ -648,28 +650,29 @@ chisq.test(t3_tab)
 # bind all props together
 lf.props = rbind(t1.f.props, t2.f.props, t3.f.props, l1.f.props)
 lf.props$ps.boot <- NULL
-all.props= rbind(lf.props, xt.a.props)
+all.props= rbind(lf.props, xt.a.props, xt.c.props)
 
 all.props$exp <- ordered(as.factor(all.props$exp), 
-                    levels = c( "X&T (2007b)", "Turk #1", 
+                    levels = c( "X&T (2007b) children", "X&T (2007b)", "Turk #1", 
                                 "Turk #2", "In Lab", "Turk #3"))
 
-all.props$exp = revalue(all.props$exp, c("X&T (2007b)" = "X&T (2007b)", "Turk #1" = "Exp. 1",
-                                "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", "Turk #3" = "Exp. 4"))
-
+all.props$exp = revalue(all.props$exp, c("X&T (2007b)" = "X&T adults", "X&T (2007b) children" = "X&T children", "Turk #1" = "Exp. 1", "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", "Turk #3" = "Exp. 4"))
 all.props$w.ans.cat  = revalue(all.props$w.ans.cat , c("sub" = "sub."))
 
+all.props.crit = all.props[all.props$w.ans.cat == "basic" | all.props$w.ans.cat == "sub.",]
+
 #pdf("../../writeup/figures/FIG_2.pdf", height = 4, width = 12)
-ggplot(all.props[all.props$w.ans.cat == "basic" | all.props$w.ans.cat == "sub.",],      
-       aes(x=w.ans.cat, y=prop, fill = Answer.sample)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+ggplot(all.props.crit, aes(x = w.ans.cat, y = prop, fill = Answer.sample)) +
+  geom_bar(stat="identity", position = position_dodge()) +
   facet_grid(. ~ exp) +
+  geom_rect(data = all.props.crit[17:24,], fill = "gray", 
+            xmin = -Inf,xmax = Inf, ymin = -Inf,ymax = Inf, alpha = 0.05) +
+  geom_linerange(aes(ymin = ciwl,ymax = ciul), position=position_dodge(.9)) +
   ylim(0, 1) +
   ylab("Prop. Participants") +
   xlab("Generalization Pattern") +
   themeML + 
-  scale_fill_brewer(name="Sampling\nCondition", palette="Set1")
+  scale_fill_brewer(name ="Sampling\nCondition", palette = "Set1") 
 #dev.off()
 
 ```
@@ -685,26 +688,27 @@ xt.c.es = d.fc(xt_data.children$response, xt_data.children$Answer.sample)
 ```
 
 ```{r}
-all.es = rbind(t1.f.es, t2.f.es, t3.f.es, l1.f.es, xt.a.es)
+all.es = rbind(t1.f.es, t2.f.es, t3.f.es, l1.f.es, xt.a.es, xt.c.es)
 all.es$exp = c("Turk #1" ,"Turk #2", "Turk #3", "In Lab",
-               "X&T (2007b)")
+               "X&T adults", "X&T children")
 all.es$exp<- ordered(as.factor(all.es$exp), 
-                     levels = c("X&T (2007b)", "Turk #1" ,"Turk #2", 
+                     levels = c( "X&T children", "X&T adults", "Turk #1" ,"Turk #2", 
                                   "In Lab", "Turk #3"))
+all.es$exp = revalue(all.es$exp, c( "Turk #1" = "Exp. 1",
+                                "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", 
+                                "Turk #3" = "Exp. 4"))
 
-all.es$exp = revalue(all.es$exp, c("X&T (2007b)" = "X&T (2007b)", "Turk #1" = "Exp. 1",
-                                "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", "Turk #3" = "Exp. 4"))
-
-#pdf("../../writeup/figures/FIG_3.pdf", height = 4, width = 4)
+pdf("../../writeup/figures/FIG_3.pdf", height = 4, width = 4)
 ggplot(all.es, aes(x = exp, y = effect_size, ymin = cill, ymax = ciul)) + 
-  geom_pointrange(position=position_dodge(width = 0.25), size = .8) + 
+  geom_pointrange(position = position_dodge(width = 0.25), size = .8) + 
   ylab("Effect Size") + 
   xlab("Experiment") + 
   geom_hline(y = 0, linetype = "dotted") +
-  theme(text = element_text(size=14)) +
+  theme(text = element_text(size = 16)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-#dev.off()
+dev.off()
+
+all.es
 ```
 
-# how to calculate errors bars -- XT do it over responses, I'm doing it over participants
 
