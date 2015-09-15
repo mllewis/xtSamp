@@ -1,4 +1,4 @@
-Replication of Xu and Tenenbaum (2007b) (Lewis & Frank, under review)
+Replication of Xu and Tenenbaum, 2007b (Lewis & Frank, under review)
 -----
 
 Analysis, data, stimuli, and writeup. 
