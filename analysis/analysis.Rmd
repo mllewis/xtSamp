@@ -31,6 +31,7 @@ library(boot)
 library(ggplot2)
 library(plyr)
 library(dplyr)
+library(pwr)
 
 # graphical parameters
 fs = 18
@@ -93,7 +94,7 @@ There are different possible criteria  for categorizing a participant as a subor
 
 ```{r, echo = F}
 # Make analytical decisions
-strict = FALSE
+strict = TRUE
 print(paste("Strict criteria: ", strict))
 
 proper = FALSE # this only affects plots
@@ -711,4 +712,33 @@ ggplot(all.es, aes(x = exp, y = effect_size, ymin = cill, ymax = ciul)) +
   theme(text = element_text(size = 16)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 #dev.off()
+```
+
+Power analysis, based on effect size estimated from Exps 1-4 and XT-Adult
+```{r}
+xt_data.adults$exp = "xt_data.adults"
+t1.f$exp = "t1"
+t2.f$exp = "t2"
+t3.f$exp = "t3"
+l1.f$exp = "l1"
+xt_data.adults$w.ans.cat = xt_data.adults$response
+all.data.f = rbind(xt_data.adults[,c("Answer.sample", "w.ans.cat", "exp")],
+                   t1.f[,c("Answer.sample", "w.ans.cat", "exp")],
+                   t2.f[,c("Answer.sample", "w.ans.cat", "exp")],
+                   l1.f[,c("Answer.sample", "w.ans.cat", "exp")],
+                   t3.f[,c("Answer.sample", "w.ans.cat", "exp")])
+all.data.f <- colwise(as.factor)(all.data.f)
+
+# get count data
+all.data.f_tab = table(all.data.f$w.ans.cat, 
+                       all.data.f$Answer.sample)[c("sub", "basic"),]
+# get effect size
+all.es = d.fc(all.data.f$w.ans.cat, all.data.f$Answer.sample)
+print(paste("Effect size:", all.es[1]))
+
+power.analysis = pwr.chisq.test(w = all.es[1],df = 1, sig.level = 0.05, power = .95)
+
+power.analysis 
+
+print(paste("N for .95 power:", power.analysis$N))
 ```
