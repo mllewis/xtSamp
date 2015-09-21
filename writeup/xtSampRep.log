@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  16 SEP 2015 13:36
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  21 SEP 2015 14:14
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -307,66 +307,66 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
 
 ]
 [2]
-LaTeX Font Info:    Try loading font information for OT1+ptmcm on input line 45
+LaTeX Font Info:    Try loading font information for OT1+ptmcm on input line 44
 .
  (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/ot1ptmcm.fd
 File: ot1ptmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ptmcm.
 )
-LaTeX Font Info:    Try loading font information for OML+ptmcm on input line 45
+LaTeX Font Info:    Try loading font information for OML+ptmcm on input line 44
 .
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/omlptmcm.fd
 File: omlptmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ptmcm.
 )
-LaTeX Font Info:    Try loading font information for OMX+psycm on input line 45
+LaTeX Font Info:    Try loading font information for OMX+psycm on input line 44
 .
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/omxpsycm.fd
 File: omxpsycm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/psycm.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 45.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 45.
-LaTeX Font Info:    Try loading font information for U+msa on input line 45.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
+LaTeX Font Info:    Try loading font information for U+msa on input line 44.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 45.
+LaTeX Font Info:    Try loading font information for U+msb on input line 44.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [3] [4]
 
-LaTeX Warning: Citation `xu2007a' undefined on input line 53.
+LaTeX Warning: Citation `xu2007a' undefined on input line 52.
 
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 64.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 63.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 64.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 63.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 64.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 63.
 <figures/stims.png, id=21, 709.2096pt x 181.6386pt>
 File: figures/stims.png Graphic file (type png)
  <use figures/stims.png>
-Package pdftex.def Info: figures/stims.png used on input line 67.
+Package pdftex.def Info: figures/stims.png used on input line 66.
 (pdftex.def)             Requested size: 361.34999pt x 92.54852pt.
 
 <figures/screen.png, id=23, 522.2712pt x 253.9086pt>
 File: figures/screen.png Graphic file (type png)
  <use figures/screen.png>
-Package pdftex.def Info: figures/screen.png used on input line 75.
+Package pdftex.def Info: figures/screen.png used on input line 74.
 (pdftex.def)             Requested size: 397.48499pt x 193.2476pt.
 
 [5] [6 <./figures/stims.png>] [7 <./figures/screen.png>]
 <figures/FIG_2.pdf, id=36, 867.24pt x 289.08pt>
 File: figures/FIG_2.pdf Graphic file (type pdf)
  <use figures/FIG_2.pdf>
-Package pdftex.def Info: figures/FIG_2.pdf used on input line 99.
+Package pdftex.def Info: figures/FIG_2.pdf used on input line 98.
 (pdftex.def)             Requested size: 469.75499pt x 156.58607pt.
 
-Overfull \hbox (36.135pt too wide) in paragraph at lines 99--100
+Overfull \hbox (36.135pt too wide) in paragraph at lines 98--99
  [] 
  []
 
@@ -374,12 +374,12 @@ Overfull \hbox (36.135pt too wide) in paragraph at lines 99--100
 File: figures/FIG_3.pdf Graphic file (type pdf)
 
 <use figures/FIG_3.pdf>
-Package pdftex.def Info: figures/FIG_3.pdf used on input line 112.
+Package pdftex.def Info: figures/FIG_3.pdf used on input line 111.
 (pdftex.def)             Requested size: 216.81pt x 216.80946pt.
  [9] [10 <./figures/FIG_3.pdf>] [11] [12] [13] [14]
 [15] [16]
 
-Class apa Warning: \bibliographystyle command ignored on input line 256.
+Class apa Warning: \bibliographystyle command ignored on input line 254.
 
 (./xtSampRep.bbl [17]) [18
 
@@ -405,7 +405,7 @@ texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texlive/2015/texmf-dist/
 fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type
 1/urw/times/utmr8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/time
 s/utmri8a.pfb>
-Output written on xtSampRep.pdf (18 pages, 616834 bytes).
+Output written on xtSampRep.pdf (18 pages, 616792 bytes).
 PDF statistics:
  117 PDF objects out of 1000 (max. 8388607)
  80 compressed objects within 1 object stream
