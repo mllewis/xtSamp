@@ -13,7 +13,7 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(3) Exp. 2 - online](#t2)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(4) Exp. 3 - in person](#l1)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) Exp. 4 - online](#t3)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) All](#all)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) All](#all)** <br/>
 
 
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
@@ -32,6 +32,8 @@ library(ggplot2)
 library(plyr)
 library(dplyr)
 library(pwr)
+library(metafor)
+library(reshape2)
 
 # graphical parameters
 fs = 18
@@ -62,7 +64,7 @@ themeML = theme(text = element_text(size=fs),
 d.fc <- function(response, cond) {
 
   # http://www.meta-analysis.com/downloads/Meta-analysis%20Converting%20among%20effect%20sizes.pdf
-  #https://www.medcalc.net/tests/odds_ratio.php
+  # https://www.medcalc.net/tests/odds_ratio.php
   response = droplevels(response)
   response <- ordered(response, levels = c( "basic", "sub"))
   cond <- ordered(cond, levels = c( "learner", "teacher"))
@@ -82,7 +84,7 @@ d.fc <- function(response, cond) {
   cill = effect_size - d_err
   ciul = effect_size + d_err
   
-  es <- data.frame(effect_size = effect_size, cill = cill, ciul = ciul)
+  es <- data.frame(effect_size = effect_size, cill = cill, ciul = ciul, var_d = var_d)
   
   return (es)
 }
@@ -107,7 +109,7 @@ X&T 2007b data - adults
 ```{r}
 N = 14
 N_per_condition = N/2  # 2 conditions (teacher + learner)
-# Note: The proportions described in the original report were obtained by aggegating across *trials* not participants (2 trials/participant). We correct for this here by taking the proportion of participants, which results in slightly different proportions than those reported in the original report.
+# Note: The proportions described in the original report were obtained by aggregating across *trials* not participants (2 trials/participant). We correct for this here by taking the proportion of participants, which results in slightly different proportions than those reported in the original report.
 
 prop_sub_teacher= .928 
 n_sub_teacher = round(prop_sub_teacher * N_per_condition)
@@ -715,6 +717,7 @@ ggplot(all.es, aes(x = exp, y = effect_size, ymin = cill, ymax = ciul)) +
 ```
 
 Power analysis, based on effect size estimated from Exps 1-4 and XT-Adult
+Method #1: Raw average across all data
 ```{r}
 xt_data.adults$exp = "xt_data.adults"
 t1.f$exp = "t1"
@@ -733,12 +736,41 @@ all.data.f <- colwise(as.factor)(all.data.f)
 all.data.f_tab = table(all.data.f$w.ans.cat, 
                        all.data.f$Answer.sample)[c("sub", "basic"),]
 # get effect size
-all.es = d.fc(all.data.f$w.ans.cat, all.data.f$Answer.sample)
-print(paste("Effect size:", all.es[1]))
+all.es.mean = d.fc(all.data.f$w.ans.cat, all.data.f$Answer.sample)
+print(paste("Effect size:", all.es.mean[1]))
 
-power.analysis = pwr.chisq.test(w = all.es[1],df = 1, sig.level = 0.05, power = .95)
+power.analysis = pwr.chisq.test(w = all.es.mean[1],df = 1, sig.level = 0.05, power = .95)
 
 power.analysis 
 
-print(paste("N for .95 power:", power.analysis$N))
+print(paste("N for .95 power (raw average):", power.analysis$N))
+```
+
+Method #2: Meta-analysis
+```{r}
+all.data.f.counts = all.data.f %>%
+                    group_by(exp, Answer.sample, w.ans.cat) %>%
+                    summarise(counts = n())
+
+all.data.f.counts.short = dcast(all.data.f.counts, value = counts, 
+                                exp ~ Answer.sample + w.ans.cat, mean)
+all.data.f.counts.short$n = rowSums(all.data.f.counts.short[,2:5])
+all.data.f.counts.short
+
+all.lor = escalc(measure = "OR", ai = learner_basic, bi = learner_sub, 
+       ci = teacher_basic, di = teacher_sub, 
+       data = all.data.f.counts.short, append = TRUE) # this is uncorrected log odds ratio
+all.es # this is in terms of d
+
+# fixed effects
+fixed.effects = rma(effect_size, var_d, data = all.es[1:5,], method = "FE")
+forest(fixed.effects, slab=all.es[1:5,"exp"])
+power.analysis = pwr.chisq.test(w = fixed.effects$b,df = 1, sig.level = 0.05, power = .95)
+print(paste("N for .95 power (fixed effects):", power.analysis$N))
+
+# random effects
+random.effects = rma(effect_size , var_d, data = all.es[1:5,])
+forest(random.effects, slab=all.es[1:5,"exp"])
+power.analysis = pwr.chisq.test(w = random.effects$b,df = 1, sig.level = 0.05, power = .95)
+print(paste("N for .95 power (random effects):", power.analysis$N))
 ```
