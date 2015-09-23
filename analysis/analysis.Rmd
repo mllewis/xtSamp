@@ -14,6 +14,7 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(4) Exp. 3 - in person](#l1)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) Exp. 4 - online](#t3)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) All](#all)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) Power calculation for Exp. 5 (#power5)** <br/>
 
 
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
@@ -69,14 +70,13 @@ d.fc <- function(response, cond) {
   response <- ordered(response, levels = c( "basic", "sub"))
   cond <- ordered(cond, levels = c( "learner", "teacher"))
   
-  #use odds ratioto calculate d
+  # use odds ratio to calculate d
   ns = table(cond, response)
   or = (ns[1]*ns[4])/(ns[2]*ns[3]) 
   cf = sqrt(3)/pi
   effect_size = log(or) * cf #calculate d
   
-  # calculate 95 CI
-  ## parametrically
+  # calculate 95 CI (parametrically)
   var_lor = (1/ns[1]) + (1/ns[2]) + (1/ns[3]) + (1/ns[4]) # sampling variance of lor
   var_d  = (3/(pi^2)) * var_lor # sampling variance of d
   d_err = sqrt(var_d) * 1.96
@@ -84,7 +84,8 @@ d.fc <- function(response, cond) {
   cill = effect_size - d_err
   ciul = effect_size + d_err
   
-  es <- data.frame(effect_size = effect_size, cill = cill, ciul = ciul, var_d = var_d)
+  es <- data.frame(effect_size = effect_size, cill = cill, 
+                   ciul = ciul, var_d = var_d)
   
   return (es)
 }
@@ -492,9 +493,9 @@ if (proper){
             (l1.f$sub1_a == 0 | l1.f$sub2_a == 0 |
                l1.f$sub1_b == 0 | l1.f$sub2_b == 0)
   l1.f$w.ans.cat[proper] <- "proper"
-  l1.f$w.ans.cat <- factor(l1.f$w.ans.cat,c("proper","sub","basic","other"))
+  l1.f$w.ans.cat <- factor(l1.f$w.ans.cat, c("proper","sub","basic","other"))
 } else {
-  l1.f$w.ans.cat <- factor(l1.f$w.ans.cat,c("sub","basic","other"))
+  l1.f$w.ans.cat <- factor(l1.f$w.ans.cat, c("sub","basic","other"))
 }
 
 # filter out "other"" responses
@@ -717,6 +718,8 @@ ggplot(all.es, aes(x = exp, y = effect_size, ymin = cill, ymax = ciul)) +
 ```
 
 Power analysis, based on effect size estimated from Exps 1-4 and XT-Adult
+
+
 Method #1: Raw average across all data
 ```{r}
 xt_data.adults$exp = "xt_data.adults"
@@ -766,11 +769,13 @@ all.es # this is in terms of d
 fixed.effects = rma(effect_size, var_d, data = all.es[1:5,], method = "FE")
 forest(fixed.effects, slab=all.es[1:5,"exp"])
 power.analysis = pwr.chisq.test(w = fixed.effects$b,df = 1, sig.level = 0.05, power = .95)
+power.analysis
 print(paste("N for .95 power (fixed effects):", power.analysis$N))
 
 # random effects
 random.effects = rma(effect_size , var_d, data = all.es[1:5,])
 forest(random.effects, slab=all.es[1:5,"exp"])
 power.analysis = pwr.chisq.test(w = random.effects$b,df = 1, sig.level = 0.05, power = .95)
+power.analysis
 print(paste("N for .95 power (random effects):", power.analysis$N))
 ```
