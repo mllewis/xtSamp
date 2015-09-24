@@ -13,8 +13,9 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(3) Exp. 2 - online](#t2)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(4) Exp. 3 - in person](#l1)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) Exp. 4 - online](#t3)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) All](#all)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) Power calculation for Exp. 5 (#power5)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) Exp. 5 - online](#t4)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(7) All](#all)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(8) Power Analysis for Exp. 5](#power5)** <br/>
 
 
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
@@ -35,6 +36,7 @@ library(dplyr)
 library(pwr)
 library(metafor)
 library(reshape2)
+library(jsonlite)
 
 # graphical parameters
 fs = 18
@@ -649,32 +651,144 @@ t3_tab = table(t3.f$w.ans.cat, t3.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t3_tab)
 ```
 
+<a name="t4"/>
+<h3> Experiment 5 - Turk Replication #5 </h3>
+
+Read in data and pre-process
+
+```{r}
+t4 <- read.csv("../data/anonymized/turk_replication_4_A.csv")
+# make factors
+t4$Answer.sample <- factor(t4$Answer.sample, labels=c('teacher','learner')) # sample0 = teacher, sample1=learner
+t4 <- colwise(as.factor)(t4)
+```
+
+Filter.
+```{r}
+t4.exclusion.ns = t4 %>%
+              summarise(n_badTraining = length(which(Answer.click1 != "\"correct\"" | 
+                                                       Answer.click2 != "\"correct\"")),
+                        n_badGeneralize = length(which(Answer.Qcheck1 != 0 | Answer.Qcheck2 != 0)),
+                        n_badFilter = length(which(Answer.question1 != 'TRUE' | Answer.question2 !='TRUE'| 
+                                Answer.question3 != 'TRUE' | Answer.question4 !='TRUE')))
+t4.exclusion.ns
+
+# subset data
+t4.f= t4 %>%
+      filter(Answer.click1 == "\"correct\"" & 
+                Answer.click2 == "\"correct\"") %>% # take out those who click on wrong training items
+      filter(Answer.Qcheck1 == 0 & Answer.Qcheck2 == 0) %>% # take out if missed check generalization question
+      filter(Answer.question1 == 'TRUE' & Answer.question2 =='TRUE' & 
+            Answer.question3 == 'TRUE' & Answer.question4 =='TRUE')  # take out those who missed filter question
+
+dim(t4)[1] # total
+dim(t4.f)[1] # total with exclusions
+```
+
+
+Categorize response patterns based on criterion.
+```{r}
+sub <-  t4.f$Answer.Qproper1 == 1 & t4.f$Answer.Qproper2 == 1 & 
+    t4.f$Answer.Qproper3 == 1 & t4.f$Answer.Qsub1 == 1 &
+    t4.f$Answer.Qsub2 == 1 & t4.f$Answer.Qbasic1 == 0 &
+    t4.f$Answer.Qbasic2 == 0 & t4.f$Answer.Qbasic3 == 0 
+
+if (strict){
+  basic <- t4.f$Answer.Qproper1 == 1 & t4.f$Answer.Qproper2 == 1 & 
+    t4.f$Answer.Qproper3 == 1 & t4.f$Answer.Qsub1 == 1 &
+    t4.f$Answer.Qsub2 == 1 & t4.f$Answer.Qbasic1 == 1 &
+    t4.f$Answer.Qbasic2 == 1 & t4.f$Answer.Qbasic3 == 1 
+} else {
+  basic <- t4.f$Answer.Qproper1 == 1 & t4.f$Answer.Qproper2 == 1 & 
+      t4.f$Answer.Qproper3 == 1 & t4.f$Answer.Qsub1 == 1 &
+      t4.f$Answer.Qsub2 == 1 & (t4.f$Answer.Qbasic1 == 1 |
+      t4.f$Answer.Qbasic2 == 1 | t4.f$Answer.Qbasic3 == 1)
+}
+
+t4.f$w.ans.cat <- "other"
+t4.f$w.ans.cat[sub] <- "sub"
+t4.f$w.ans.cat[basic] <- "basic"
+
+if (proper){
+  proper <- (t4.f$Answer.Qproper1 == 1 & t4.f$Answer.Qproper2 == 1 & 
+            t4.f$Answer.Qproper3 == 1) & t4.f$Answer.Qsub1 == 0 &
+            t4.f$Answer.Qsub2 == 0 & t4.f$Answer.Qbasic1 == 0 &
+            t4.f$Answer.Qbasic2 == 0 & t4.f$Answer.Qbasic3 == 0 
+  
+  t4.f$w.ans.cat[proper] <- "proper"
+  t4.f$w.ans.cat = factor(t4.f$w.ans.cat, levels=c("proper", "sub", "basic", "other"))
+} else { 
+  t4.f$w.ans.cat = factor(t4.f$w.ans.cat, levels=c("sub", "basic", "other"))
+}
+
+# filter out "other"" responses
+length(which(t4.f$w.ans.cat == "other"))
+t4.f = t4.f[t4.f$w.ans.cat != "other",]
+t4.f$w.ans.cat = droplevels(t4.f$w.ans.cat)
+
+# get proportions and bootstrapped CIS
+M <- data.frame()
+for (k in 1:length(levels(t4.f$w.ans.cat))){
+    M = rbind(M, ddply(t4.f, .(Answer.sample), 
+                     function (d) {get.prop.CIs(d$w.ans.cat, levels(d$w.ans.cat)[k])}))
+}
+
+t4.f.props = t4.f %>%
+          group_by(Answer.sample, w.ans.cat) %>%
+          summarise (n = n()) %>%
+          mutate(prop = n / sum(n),
+                 exp = "Turk #4") %>%
+          left_join(M)
+```
+
+```{r,echo = F}
+ggplot(t4.f.props, aes(x = factor(w.ans.cat), y = prop, fill = Answer.sample)) +
+  geom_bar(stat = "identity", position=position_dodge()) +
+  geom_linerange(aes(ymin = ciwl,ymax = ciul), position = position_dodge(.9)) +
+  ylim(0,1) +
+  ylab("Prop. participants") +
+  xlab("Generalization pattern") +
+  ggtitle("Turk Replication #4") +
+  themeML + 
+  theme(legend.position = c(.85,.8)) + 
+    scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
+```
+
+Stats
+```{r}
+t4_tab = table(t4.f$w.ans.cat, t4.f$Answer.sample)[c("sub", "basic"),]
+chisq.test(t4_tab)
+```
+
 <a name="all"/>
 <h3> All experiments </h3>
 
+All proportions
 ```{r}
 # bind all props together
-lf.props = rbind(t1.f.props, t2.f.props, t3.f.props, l1.f.props)
+lf.props = rbind(t1.f.props, t2.f.props, t3.f.props, t4.f.props, l1.f.props)
 lf.props$ps.boot <- NULL
 all.props= rbind(lf.props, xt.a.props, xt.c.props)
 
 all.props$exp <- ordered(as.factor(all.props$exp), 
                     levels = c( "X&T (2007b) children", "X&T (2007b)", "Turk #1", 
-                                "Turk #2", "In Lab", "Turk #3"))
+                                "Turk #2", "In Lab", "Turk #3",  "Turk #4" ))
 
-all.props$exp = revalue(all.props$exp, c("X&T (2007b)" = "X&T adults", "X&T (2007b) children" = "X&T children", "Turk #1" = "Exp. 1", "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", "Turk #3" = "Exp. 4"))
+all.props$exp = revalue(all.props$exp, c("X&T (2007b)" = "X&T adults", "X&T (2007b) children" = "X&T children", "Turk #1" = "Exp. 1", "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", "Turk #3" = "Exp. 4", "Turk #4" = "Exp. 5"))
 all.props$w.ans.cat  = revalue(all.props$w.ans.cat , c("sub" = "sub."))
 
 all.props.crit = all.props[all.props$w.ans.cat == "basic" | all.props$w.ans.cat == "sub.",]
 ```
 
 ```{r, fig.width = 10, echo = F}
-#pdf("../../writeup/figures/FIG_2.pdf", height = 4, width = 12)
-ggplot(all.props.crit, aes(x = w.ans.cat, y = prop, fill = Answer.sample)) +
+#pdf("../writeup/figures/FIG_2.pdf", height = 4, width = 12)
+ggplot(all.props.crit, aes(x = w.ans.cat, y = prop, 
+                           fill = Answer.sample)) +
   geom_bar(stat="identity", position = position_dodge()) +
   facet_grid(. ~ exp) +
-  geom_rect(data = all.props.crit[17:24,], fill = "gray", 
-            xmin = -Inf,xmax = Inf, ymin = -Inf,ymax = Inf, alpha = 0.07) +
+  geom_rect(data = all.props.crit[21:28,], fill = "gray", 
+            xmin = -Inf,xmax = Inf, ymin = -Inf,
+            ymax = Inf, alpha = 0.07) +
   geom_linerange(aes(ymin = ciwl,ymax = ciul), position=position_dodge(.9)) +
   ylim(0, 1) +
   ylab("Prop. Participants") +
@@ -684,57 +798,160 @@ ggplot(all.props.crit, aes(x = w.ans.cat, y = prop, fill = Answer.sample)) +
 #dev.off()
 ```
 
-Effect sizes
+All effect sizes
 ```{r}
+# get cohen's d effect sizes
 t1.f.es = d.fc(t1.f$w.ans.cat, t1.f$Answer.sample)
-t2.f.es= d.fc(t2.f$w.ans.cat, t2.f$Answer.sample)
+t2.f.es = d.fc(t2.f$w.ans.cat, t2.f$Answer.sample)
 t3.f.es = d.fc(t3.f$w.ans.cat, t3.f$Answer.sample)
+t4.f.es = d.fc(t4.f$w.ans.cat, t4.f$Answer.sample)
 l1.f.es= d.fc(l1.f$w.ans.cat, l1.f$Answer.sample)
-xt.a.es = d.fc(xt_data.adults$response, xt_data.adults$Answer.sample)
+xt.a.es  = d.fc(xt_data.adults$response, xt_data.adults$Answer.sample)
 xt.c.es = d.fc(xt_data.children$response, xt_data.children$Answer.sample)
 
-all.es = rbind(t1.f.es, t2.f.es, t3.f.es, l1.f.es, xt.a.es, xt.c.es)
-all.es$exp = c("Turk #1" ,"Turk #2", "Turk #3", "In Lab" ,
+all.es = rbind(t1.f.es, t2.f.es, t3.f.es, t4.f.es, l1.f.es, xt.a.es, xt.c.es)
+all.es$exp = c("Turk #1" ,"Turk #2", "Turk #3", "Turk #4", "In Lab",
                "X&T adults", "X&T children")
-all.es$exp<- ordered(as.factor(all.es$exp), 
-                     levels = c( "X&T children", "X&T adults", "Turk #1" ,"Turk #2", 
-                                  "In Lab", "Turk #3"))
 all.es$exp = revalue(all.es$exp, c( "Turk #1" = "Exp. 1",
                                 "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", 
-                                "Turk #3" = "Exp. 4"))
-all.es
-```
+                                "Turk #3" = "Exp. 4", "Turk #4" = "Exp. 5"))
+names(all.es)[1] = "effect_size_d"
 
-```{r, echo = F}
-#pdf("../../writeup/figures/FIG_3.pdf", height = 4, width = 4)
-ggplot(all.es, aes(x = exp, y = effect_size, ymin = cill, ymax = ciul)) + 
-  geom_pointrange(position = position_dodge(width = 0.25), size = .8) + 
-  ylab("Effect Size") + 
-  xlab("Experiment") + 
-  geom_hline(y = 0, linetype = "dotted") +
-  theme(text = element_text(size = 16)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-#dev.off()
-```
-
-Power analysis, based on effect size estimated from Exps 1-4 and XT-Adult
-
-
-Method #1: Raw average across all data
-```{r}
-xt_data.adults$exp = "xt_data.adults"
-t1.f$exp = "t1"
-t2.f$exp = "t2"
-t3.f$exp = "t3"
-l1.f$exp = "l1"
+# merge together all raw data so can also get log odds ratio
+xt_data.adults$exp = "X&T adults"
+xt_data.children$exp = "X&T children"
+t1.f$exp = "Exp. 1"
+t2.f$exp = "Exp. 2"
+t3.f$exp = "Exp. 4"
+t4.f$exp = "Exp. 5"
+l1.f$exp = "Exp. 3"
 xt_data.adults$w.ans.cat = xt_data.adults$response
-all.data.f = rbind(xt_data.adults[,c("Answer.sample", "w.ans.cat", "exp")],
+xt_data.children$w.ans.cat = xt_data.children$response
+
+all.data.f = rbind(xt_data.children[,c("Answer.sample", "w.ans.cat", "exp")],
+                  xt_data.adults[,c("Answer.sample", "w.ans.cat", "exp")],
                    t1.f[,c("Answer.sample", "w.ans.cat", "exp")],
                    t2.f[,c("Answer.sample", "w.ans.cat", "exp")],
                    l1.f[,c("Answer.sample", "w.ans.cat", "exp")],
-                   t3.f[,c("Answer.sample", "w.ans.cat", "exp")])
+                   t3.f[,c("Answer.sample", "w.ans.cat", "exp")],
+                   t4.f[,c("Answer.sample", "w.ans.cat", "exp")])
 all.data.f <- colwise(as.factor)(all.data.f)
 
+# get count by conditions
+all.data.f.counts = all.data.f %>%
+                    group_by(exp, Answer.sample, w.ans.cat) %>%
+                    summarise(counts = n())
+all.data.f.counts.short = dcast(all.data.f.counts, value = counts, 
+                                exp ~ Answer.sample + w.ans.cat, mean)
+all.data.f.counts.short$n = rowSums(all.data.f.counts.short[,2:5])
+
+# get log odds ratio
+all.lor = escalc(measure = "OR", ai = learner_basic, bi = learner_sub, 
+       ci = teacher_basic, di = teacher_sub, 
+       data = all.data.f.counts.short, append = TRUE) # this is uncorrected log odds ratio
+names(all.lor)[7] = "effect_size_lor"
+names(all.lor)[8] = "var_lor"
+
+all.es = left_join(all.es, all.lor, by="exp")
+
+all.es$exp <- ordered(as.factor(all.es$exp ), 
+                    levels = c( "X&T children", "X&T adults", "Exp. 1", 
+                                "Exp. 2", "Exp. 3", "Exp. 4",  "Exp. 5" ))
+all.es = all.es[c(7, 6, 1,2,5, 3, 4),]
+
+## fixed effects
+# cohen's d
+fixed.effects.d = rma(effect_size_d, var_d, data = all.es, method = "FE")
+forest(fixed.effects.d, slab=all.es$exp,   mlab = "FE estimate in d")
+
+# lor
+fixed.effects.lor = rma(effect_size_lor, var_lor, data = all.es, method = "FE")
+forest(fixed.effects.lor, slab=all.es$exp,mlab = "FE estimate in log odds")
+
+## random effects
+# cohen's d
+random.effects.d = rma(effect_size_d, var_d, data = all.es)
+forest(random.effects.d, slab=all.es$exp,   mlab = "RE estimate in d")
+
+# lor
+random.effects.lor = rma(effect_size_lor, var_lor, data = all.es)
+forest(random.effects.lor, slab=all.es$exp, mlab = "RE estimate in log odds")
+```
+
+```{r, echo = F}
+#pdf("../writeup/figures/FIG_3.pdf", height = 5, width = 8)
+par(cex=1, font=1)
+forest(random.effects.d, 
+       slab=all.es$exp,
+       mlab = "All", 
+       xlab = "Cohen's d")
+par(font=2)
+text(-3.6, 8.55, "Experiment")
+text(5.8, 8.55, "Cohen's d [95% CI]")
+
+addpoly(random.effects.d, row= -1, cex=.75, 
+        annotate = F,  col = "red", mlab = "", efac = 2)
+#dev.off()
+
+
+```
+
+<a name="power5"/>
+<h3> Power analysis, based on effect size estimated from Exps 1-4 and XT-Adult </h3>
+```{r}
+# fixed effects
+fixed.effects = rma(effect_size_d, var_d, data = all.es[2:6,], method = "FE")
+power.analysis = pwr.chisq.test(w = fixed.effects$b, df = 1, 
+                                sig.level = 0.05, power = .95)
+power.analysis
+print(paste("N for .95 power (fixed effects):", power.analysis$N))
+
+# random effects
+random.effects = rma(effect_size_d , var_d, data = all.es[2:6,])#
+power.analysis = pwr.chisq.test(w = random.effects$b, df = 1, 
+                                sig.level = 0.05, power = .95)
+power.analysis
+print(paste("N for .95 power (random effects):", power.analysis$N))
+```
+
+
+
+```{r, include = F, eval = F}
+# Mikes Forrest
+  f <- fitted(rma(effect_size, var_d, data = all.es))
+  p <- predict(rma(effect_size, var_d, data = all.es))
+  
+   forest_data <- data.frame(effects = as.numeric(model()$yi.f),
+                              variances = model()$vi.f) %>%
+      mutate(effects.cil = effects - qnorm(alpha/2, lower.tail = FALSE) * sqrt(variances),
+             effects.cih = effects + qnorm(alpha/2, lower.tail = FALSE) * sqrt(variances),
+             estimate = as.numeric(f),
+             unique_ID = names(f),
+             estimate.cil = p$ci.lb,
+             estimate.cih = p$ci.ub,
+             identity = 1) %>%
+      left_join(mutate(data(), unique_ID = make.unique(unique_ID))) %>%
+      arrange(desc(effects)) %>%
+      mutate(unique_ID = factor(unique_ID, levels = unique_ID))
+
+    qplot(exp, effect_size, ymin = cill, ymax = ciul,
+          geom = "linerange",
+          data = all.es) +
+      #geom_point(aes(y = effect_size, size = n)) +
+      geom_point(aes(y = effect_size)) +
+      #geom_pointrange(aes(x = exp,
+       #             y = effect_size,
+        #            ymin = cill,
+        #            ymax = ciul),
+        #        col = "red") +
+      coord_flip() +
+      scale_size_continuous(name = "N") +
+      scale_colour_manual(values = c("data" = "black", "model" = "red")) +
+      xlab("") +
+      ylab("Effect Size") +
+      theme_bw() +
+      theme(text = element_text(family = font))
+    
 # get count data
 all.data.f_tab = table(all.data.f$w.ans.cat, 
                        all.data.f$Answer.sample)[c("sub", "basic"),]
@@ -747,35 +964,16 @@ power.analysis = pwr.chisq.test(w = all.es.mean[1],df = 1, sig.level = 0.05, pow
 power.analysis 
 
 print(paste("N for .95 power (raw average):", power.analysis$N))
+
+#pdf("../../writeup/figures/FIG_3.pdf", height = 4, width = 4)
+ggplot(all.es, aes(x = exp, y = effect_size_d, ymin = cill, ymax = ciul)) + 
+  geom_pointrange(position = position_dodge(width = 0.25), size = .8) + 
+  ylab("Effect Size") + 
+  xlab("Experiment") + 
+  geom_hline(y = 0, linetype = "dotted") +
+  theme(text = element_text(size = 16)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_flip() 
+#dev.off()
 ```
 
-Method #2: Meta-analysis
-```{r}
-all.data.f.counts = all.data.f %>%
-                    group_by(exp, Answer.sample, w.ans.cat) %>%
-                    summarise(counts = n())
-
-all.data.f.counts.short = dcast(all.data.f.counts, value = counts, 
-                                exp ~ Answer.sample + w.ans.cat, mean)
-all.data.f.counts.short$n = rowSums(all.data.f.counts.short[,2:5])
-all.data.f.counts.short
-
-all.lor = escalc(measure = "OR", ai = learner_basic, bi = learner_sub, 
-       ci = teacher_basic, di = teacher_sub, 
-       data = all.data.f.counts.short, append = TRUE) # this is uncorrected log odds ratio
-all.es # this is in terms of d
-
-# fixed effects
-fixed.effects = rma(effect_size, var_d, data = all.es[1:5,], method = "FE")
-forest(fixed.effects, slab=all.es[1:5,"exp"])
-power.analysis = pwr.chisq.test(w = fixed.effects$b,df = 1, sig.level = 0.05, power = .95)
-power.analysis
-print(paste("N for .95 power (fixed effects):", power.analysis$N))
-
-# random effects
-random.effects = rma(effect_size , var_d, data = all.es[1:5,])
-forest(random.effects, slab=all.es[1:5,"exp"])
-power.analysis = pwr.chisq.test(w = random.effects$b,df = 1, sig.level = 0.05, power = .95)
-power.analysis
-print(paste("N for .95 power (random effects):", power.analysis$N))
-```
