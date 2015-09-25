@@ -8,7 +8,7 @@ output: html_document
 ***
 
 **TABLE OF CONTENTS**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(1) Xu and Tenenabum 2007b (original)](#o)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(1) Original Xu and Tenenabum (2007b)](#o)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(2) Exp. 1 - online](#t1)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(3) Exp. 2 - online](#t2)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(4) Exp. 3 - in person](#l1)** <br/>
@@ -27,36 +27,24 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 
 rm(list = ls())
 
-#--Load packages--
+# load packages
 library(knitr)
-library(boot)
 library(ggplot2)
 library(plyr)
 library(dplyr)
 library(pwr)
 library(metafor)
-library(reshape2)
-library(jsonlite)
+library(compute.es)
+library(langcog)
+library(tidyr)
 
-# graphical parameters
+# set graphical parameters
 fs = 18
 ts = 20
 
-get.prop.CIs <- function(d, dv){ 
-  prop = sum(d==dv)/length(d)
-
-  # bootstrap across subject proportion responses for each category
-  b <- boot(d, function(u, i) table(u[i])[dv]/length(u), R = 1000) 
-  ci <- boot.ci(b, type = "perc")  
-  ciwl = ci$percent[4]
-  ciwu = ci$percent[5]
-  
-  p.CIS <- data.frame(ciwl = ciwl, ciul = ciwu, w.ans.cat = dv, ps.boot = prop)
-  return (p.CIS)
-}
-
+# define helper functions
 theme_set(theme_bw())
-themeML = theme(text = element_text(size=fs),
+themeML = theme(text = element_text(size = fs),
                 plot.title=element_text(size=ts, face = "bold"),
                 plot.background = element_blank(),
                 panel.grid.major = element_blank(),
@@ -64,45 +52,52 @@ themeML = theme(text = element_text(size=fs),
                 panel.border = element_blank(),
                 axis.line = element_line(color = 'black')) 
 
-d.fc <- function(response, cond) {
+get_bootstrapped_props <- function(df, conditionName, expName){
+  
+  names(df)[which(names(df) == conditionName)] = "response.cat"
+  
+  df = df %>%
+    mutate(w.ans.cat.sub = as.numeric(response.cat)-1,
+           w.ans.cat.b = 1-(as.numeric(response.cat))+1) %>%
+    group_by(Answer.sample)
+  
+  ns = df %>% 
+    group_by(response.cat, Answer.sample) %>% 
+        summarise(n = n())
+  
+  ns_cond = df %>% 
+            group_by(Answer.sample) %>% 
+            summarise(n_cond = n())
+  
+  # get props
+  props = df %>%
+    multi_boot_standard(column = "w.ans.cat.b")  %>%
+    mutate(response.cat = "basic") 
+  props = multi_boot_standard(df, column = "w.ans.cat.sub") %>%
+    mutate(response.cat = "sub") %>%
+    rbind(props) %>%
+    left_join(ns, by=c("response.cat", "Answer.sample")) %>%
+    left_join(ns_cond, by = c("Answer.sample"))
+    
+  props$response.cat = as.factor(props$response.cat)
+  props$response.cat = ordered(props$response.cat, levels = c("sub", "basic"))
+  props$Answer.sample = ordered(props$Answer.sample, levels = c("teacher", "learner"))
 
-  # http://www.meta-analysis.com/downloads/Meta-analysis%20Converting%20among%20effect%20sizes.pdf
-  # https://www.medcalc.net/tests/odds_ratio.php
-  response = droplevels(response)
-  response <- ordered(response, levels = c( "basic", "sub"))
-  cond <- ordered(cond, levels = c( "learner", "teacher"))
+  names(props)[2:4] = c("prop", "cill", "ciul")
+  props$exp = expName
   
-  # use odds ratio to calculate d
-  ns = table(cond, response)
-  or = (ns[1]*ns[4])/(ns[2]*ns[3]) 
-  cf = sqrt(3)/pi
-  effect_size = log(or) * cf #calculate d
-  
-  # calculate 95 CI (parametrically)
-  var_lor = (1/ns[1]) + (1/ns[2]) + (1/ns[3]) + (1/ns[4]) # sampling variance of lor
-  var_d  = (3/(pi^2)) * var_lor # sampling variance of d
-  d_err = sqrt(var_d) * 1.96
-  
-  cill = effect_size - d_err
-  ciul = effect_size + d_err
-  
-  es <- data.frame(effect_size = effect_size, cill = cill, 
-                   ciul = ciul, var_d = var_d)
-  
-  return (es)
+  return(props)
 }
 
 opts_chunk$set(echo = T, message = F, warning = F, error = F, cache = F)
 ```
 
-There are different possible criteria  for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently across questions as either a subordinate or a basic generalizer for each of the two trials. In contrast, we observed a wide variety of responses across questions by participants in our sample. Thus, we adopt two criteria in analyzing our data: a "strict" criteria where we only include participants if they responded consistently ("yes" or "no" to all basic-level questions and "yes" or "no" to all subordinate level questions), and a "liberal" criteria where we counted a particpant as a basic generalizer if they responded "yes" to any of the basic level questions. The results of the liberal criteria are described in the Main Text, and the results of the strict criteria are described in Appendix A.
+There are different possible criteria  for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently across questions as either a subordinate or a basic generalizer for each of the two trials. In contrast, we observed a wide variety of responses across questions by participants in our sample. Thus, we adopt two criteria in analyzing our data: a "strict" criteria where we only include participants if they responded consistently ("yes" or "no" to all basic-level questions and "yes" or "no" to all subordinate level questions), and a "liberal" criteria where we counted a particpant as a basic generalizer if they responded "yes" to any of the basic level questions. The results of the liberal criteria are reported in the Main Text, and the results of the strict criteria are reported in Appendix A.
 
 ```{r, echo = F}
-# Make analytical decisions
+# Make global analytical decisions
 strict = TRUE
 print(paste("Strict criteria: ", strict))
-
-proper = FALSE # this only affects plots
 ```
 
 <a name="o"/>
@@ -112,8 +107,9 @@ X&T 2007b data - adults
 ```{r}
 N = 14
 N_per_condition = N/2  # 2 conditions (teacher + learner)
-# Note: The proportions described in the original report were obtained by aggregating across *trials* not participants (2 trials/participant). We correct for this here by taking the proportion of participants, which results in slightly different proportions than those reported in the original report.
+# Note: The proportions described in the original report were obtained by aggregating across *trials* not participants (2 trials/participant). We correct for this here by taking the proportion of participants, which results in slightly different proportions than those reported in the original paper.
 
+# make raw data
 prop_sub_teacher= .928 
 n_sub_teacher = round(prop_sub_teacher * N_per_condition)
 n_basic_teacher = N_per_condition - n_sub_teacher 
@@ -122,36 +118,18 @@ teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher),
 
 prop_sub_learner = .357
 n_sub_learner = round(prop_sub_learner * N_per_condition)
-n_basic_learner= N_per_condition - n_sub_learner
+n_basic_learner = N_per_condition - n_sub_learner
 learner_xt_data = as.factor(c(rep("sub", n_sub_learner), 
                               rep("basic", n_basic_learner)))
 
 xt_data.adults = data.frame(response=c(as.character(teacher_xt_data),
                                        as.character(learner_xt_data)))
 xt_data.adults$Answer.sample[1:N_per_condition] = "teacher"
-xt_data.adults$Answer.sample[(N_per_condition+1):
-                              (N_per_condition*2)] = "learner"
+xt_data.adults$Answer.sample[(N_per_condition + 1):
+                              (N_per_condition * 2)] = "learner"
 
-# get proportions and bootstrapped CIS
-M <- data.frame()
-for (k in 1:length(levels(learner_xt_data))){
-    M = rbind(M, ddply(xt_data.adults, .(Answer.sample), 
-                     function (d) {get.prop.CIs(d$response, levels(d$response)[k])}))
-}
-
-xt.a.props = M
-names(xt.a.props)[names(xt.a.props) == "ps.boot"] = "prop"
-xt.a.props$exp ="X&T (2007b)"
-
-# add n's
-xt.a.props[xt.a.props$Answer.sample == "teacher" &
-           xt.a.props$w.ans.cat == "sub", "n" ] = n_sub_teacher 
-xt.a.props[xt.a.props$Answer.sample == "teacher" & 
-           xt.a.props$w.ans.cat == "basic", "n"] = n_basic_teacher 
-xt.a.props[xt.a.props$Answer.sample == "learner" & 
-           xt.a.props$w.ans.cat == "sub", "n" ] = n_sub_learner 
-xt.a.props[xt.a.props$Answer.sample == "learner" & 
-           xt.a.props$w.ans.cat == "basic", "n" ] = n_basic_learner 
+# get props
+xt.a.props = get_bootstrapped_props(xt_data.adults, "response", "X&T (2007b) adults")
 ```
 
 X&T 2007b data - children
@@ -159,6 +137,7 @@ X&T 2007b data - children
 N = 24
 N_per_condition = N/2 # 2 conditions
 
+# make raw data
 prop_sub_teacher= .71
 n_sub_teacher = round(prop_sub_teacher * N_per_condition)
 n_basic_teacher = N_per_condition - n_sub_teacher 
@@ -167,54 +146,36 @@ teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher),
 
 prop_sub_learner = .29
 n_sub_learner = round(prop_sub_learner * N_per_condition)
-n_basic_learner= N_per_condition - n_sub_learner
+n_basic_learner = N_per_condition - n_sub_learner
 learner_xt_data = as.factor(c(rep("sub", n_sub_learner), 
                               rep("basic", n_basic_learner)))
 
 xt_data.children = data.frame(response=c(as.character(teacher_xt_data),
                                        as.character(learner_xt_data)))
 xt_data.children$Answer.sample[1:N_per_condition] = "teacher"
-xt_data.children$Answer.sample[(N_per_condition+1):
-                               (2*N_per_condition)] = "learner"
+xt_data.children$Answer.sample[(N_per_condition + 1):
+                               (N_per_condition * 2)] = "learner"
 
-# get proportions and bootstrapped CIS
-M <- data.frame()
-for (k in 1:length(levels(learner_xt_data))){
-    M = rbind(M, ddply(xt_data.children, .(Answer.sample), 
-                     function (d) {get.prop.CIs(d$response, levels(d$response)[k])}))
-}
-
-xt.c.props = M
-names(xt.c.props)[names(xt.c.props) == "ps.boot"] = "prop"
-xt.c.props$exp ="X&T (2007b) children"
-
-# add n's
-xt.c.props[xt.c.props$Answer.sample == "teacher" &
-           xt.c.props$w.ans.cat== "sub", "n" ] = n_sub_teacher 
-xt.c.props[xt.c.props$Answer.sample == "teacher" & 
-           xt.c.props$w.ans.cat== "basic", "n"] = n_basic_teacher 
-xt.c.props[xt.c.props$Answer.sample == "learner" & 
-           xt.c.props$w.ans.cat== "sub", "n" ] = n_sub_learner 
-xt.c.props[xt.c.props$Answer.sample == "learner" & 
-           xt.c.props$w.ans.cat== "basic", "n" ] = n_basic_learner 
+# get props
+xt.c.props = get_bootstrapped_props(xt_data.children, "response", "X&T (2007b) children")
 ```
+
 
 ```{r, echo = F}
 xt = rbind(xt.c.props, xt.a.props)
-xt$exp = revalue(xt$exp,c("X&T (2007b) children" = "children",
-                          "X&T (2007b)" = "adults"))
+
 # re-order levels so consistent with other exps
 xt$Answer.sample <- ordered(xt$Answer.sample, 
                     levels = c("teacher", "learner"))
 
-ggplot(xt, aes(x=factor(w.ans.cat), y=prop, fill=Answer.sample)) +
+ggplot(xt, aes(x = response.cat, y = prop, fill = Answer.sample)) +
   facet_grid(. ~ exp) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
-  scale_fill_brewer(name="Sampling\nCondition", palette="Set1") +
+  scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1") +
   ggtitle("Original Xu and Tenenbaum Data") +
   themeML  
 ```
@@ -227,9 +188,8 @@ Read in data and pre-process.
 t1 = read.csv("../data/anonymized/turk_replication_1_A.csv")
 
 # make factors
-t1$Answer.sample <- factor(t1$Answer.sample, labels=c('teacher','learner')) # sample0= teacher, sample1=learner
-t1$Answer.label <- factor(t1$Answer.label, labels=c('nolabel','label')) # 0=nolabel, 1=label
-
+t1$Answer.sample <- factor(t1$Answer.sample, labels=c('teacher','learner')) # sample0 = teacher, sample1 = learner
+t1$Answer.label <- factor(t1$Answer.label, labels=c('nolabel','label')) # 0 = nolabel, 1 = label
 t1 <- colwise(as.factor)(t1)
 ```
 
@@ -275,49 +235,28 @@ if (strict){
 t1.f$w.ans.cat <- "other"
 t1.f$w.ans.cat[sub] <- "sub"
 t1.f$w.ans.cat[basic] <- "basic"
-
-if (proper){
-  #proper <- t1.f$Answer.Qwsmm1 == 0 & t1.f$Answer.Qwsmm2 == 0 & 
-  #      (t1.f$Answer.Qwsm1 == 0 & t1.f$Answer.Qwsm2 == 0)
-  proper <- t1.f$Answer.Qwsmm1 == 0 & t1.f$Answer.Qwsmm2 == 0 & 
-        (t1.f$Answer.Qwsm1 == 0 | t1.f$Answer.Qwsm2 == 0)
-  t1.f$w.ans.cat[proper] <- "proper"
-  t1.f$w.ans.cat = factor(t1.f$w.ans.cat, levels=c("proper", "sub", "basic", "other"))
-} else {
-  t1.f$w.ans.cat = factor(t1.f$w.ans.cat, levels=c("sub", "basic", "other"))
-}
+t1.f$w.ans.cat = factor(t1.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
 # filter out other responses
 length(which(t1.f$w.ans.cat == "other"))
 t1.f = t1.f[t1.f$w.ans.cat != "other",]
 t1.f$w.ans.cat = droplevels(t1.f$w.ans.cat)
 
-# get proportions and bootstrapped CIS
-M <- data.frame()
-for (k in 1:length(levels(t1.f$w.ans.cat))){
-    M = rbind(M, ddply(t1.f, .(Answer.sample), 
-                     function (d) {get.prop.CIs(d$w.ans.cat, levels(d$w.ans.cat)[k])}))
-}
-
-t1.f.props = t1.f %>%
-          group_by(Answer.sample, w.ans.cat) %>%
-          summarise (n = n()) %>%
-          mutate(prop = n / sum(n),
-                 exp = "Turk #1") %>%
-          left_join(M)
+# get props
+t1.f.props = get_bootstrapped_props(t1.f, "w.ans.cat", "Turk #1")
 ```
 
 ```{r, echo = F}
-ggplot(t1.f.props, aes(x=factor(w.ans.cat), y=prop, fill=Answer.sample)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+ggplot(t1.f.props, aes(x = response.cat, y = prop, fill = Answer.sample)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
   ggtitle("Turk Replication #1") +
   theme(legend.position=c(.85,.8)) + 
   themeML  +
-  scale_fill_brewer(name="Sampling\nCondition", palette="Set1")
+  scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
 Stats
@@ -335,7 +274,8 @@ t2 <- read.csv("../data/anonymized/turk_replication_2_A.csv", header=T)
 t2  <- t2 [,c(-1:-19,-21:-32,-36,-41:-43,-54:-55,-56)] # remove unnecessary columns
 
 # make factors
-t2$Answer.sample <- factor(t2$Answer.sample, labels=c('teacher','learner')) # sample0 = teacher, sample1=learner
+t2$Answer.sample <- factor(t2$Answer.sample,
+                           labels=c('teacher','learner')) # sample0 = teacher, sample1 = learner
 t2 <- colwise(as.factor)(t2)
 ```
 
@@ -348,7 +288,8 @@ t2.exclusion.ns = t2 %>%
                         n_badGeneralize = length(which(Answer.Qcheck1 != 0 | Answer.Qcheck2 != 0)),
                         n_badFilter = length(which(Answer.question1 != 'true' | 
                                                      Answer.question2 != 'true' | 
-                                                     Answer.question3 != 'true' | Answer.question4 !='true')))
+                                                     Answer.question3 != 'true' | 
+                                                     Answer.question4 !='true')))
 t2.exclusion.ns
 
 # subset data
@@ -356,12 +297,12 @@ t2.f = t2 %>%
        filter(Answer.click1 == "\"correct\"" &
                 Answer.click2 == "\"correct\"") %>% # take out those who click on wrong training items
       filter(Answer.Qcheck1 == 0 & Answer.Qcheck2 == 0) %>% # take out if missed check generalization question
-      filter(Answer.question1 != 'true' | Answer.question2 != 'true' | Answer.question3 == 'true' & Answer.question4 =='true')  # take out those who missed attention check questions
+      filter(Answer.question1 != 'true' | Answer.question2 != 'true' | 
+               Answer.question3 == 'true' & Answer.question4 == 'true')  # take out those who missed attention check questions
 
 dim(t2)[1] # total
 dim(t2.f)[1] # total with exclusions
 ```
-
 
 Categorize response patterns based on criterion.
 ```{r}
@@ -385,51 +326,28 @@ if (strict){
 t2.f$w.ans.cat <- "other"
 t2.f$w.ans.cat[sub] <- "sub"
 t2.f$w.ans.cat[basic] <- "basic"
-
-if(proper){
-  proper <- (t2.f$Answer.Qproper1 == 1 & t2.f$Answer.Qproper2 == 1 & 
-    t2.f$Answer.Qproper3 == 1) & t2.f$Answer.Qsub1 == 0 &
-    t2.f$Answer.Qsub2 == 0 & t2.f$Answer.Qbasic1 == 0 &
-    t2.f$Answer.Qbasic2 == 0 & t2.f$Answer.Qbasic3 == 0 
-    
-    t2.f$w.ans.cat[proper] <- "proper"
-    t2.f$w.ans.cat = factor(t2.f$w.ans.cat, levels=c("proper", "sub", "basic", "other"))
-
-} else {
-  t2.f$w.ans.cat = factor(t2.f$w.ans.cat, levels=c("sub", "basic", "other"))
-}
+t2.f$w.ans.cat = factor(t2.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
 # filter out "other" responses
 length(which(t2.f$w.ans.cat == "other"))
 t2.f = t2.f[t2.f$w.ans.cat != "other",]
 t2.f$w.ans.cat = droplevels(t2.f$w.ans.cat)
 
-# get proportions and bootstrapped CIS
-M <- data.frame()
-for (k in 1:length(levels(t2.f$w.ans.cat))){
-    M = rbind(M, ddply(t2.f, .(Answer.sample), 
-                     function (d) {get.prop.CIs(d$w.ans.cat, levels(d$w.ans.cat)[k])}))
-}
-
-t2.f.props = t2.f %>%
-          group_by(Answer.sample, w.ans.cat) %>%
-          summarise (n = n()) %>%
-          mutate(prop = n / sum(n),
-                 exp = "Turk #2") %>%
-          left_join(M)
+# get props
+t2.f.props = get_bootstrapped_props(t2.f, "w.ans.cat", "Turk #2")
 ```
 
 ```{r, echo = F}
-ggplot(t2.f.props, aes(x = factor(w.ans.cat), y = prop, fill = Answer.sample)) +
-  geom_bar(stat ="identity", position = position_dodge()) +
-  geom_linerange(aes(ymin = ciwl, ymax = ciul), position = position_dodge(.9)) +
+ggplot(t2.f.props, aes(x = response.cat, y = prop, fill = Answer.sample)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
   ggtitle("Turk Replication #2") +
   themeML + 
-  theme(legend.position=c(.85, .8)) + 
-  scale_fill_brewer(name="Sampling\nCondition", palette="Set1")
+  theme(legend.position = c(.85, .8)) + 
+  scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
 Stats 
@@ -438,9 +356,8 @@ t2_tab = table(t2.f$w.ans.cat, t2.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t2_tab)
 ```
 
-
 <a name="l1"/>
-<h3> Experiment 3 - In Lab Replication </h3>
+<h3> Experiment 3 - In Person Replication </h3>
 
 ```{r}
 l1 <- read.csv("../data/anonymized/inlab_replication.csv")
@@ -448,17 +365,16 @@ l1 <- read.csv("../data/anonymized/inlab_replication.csv")
 # make factors
 l1 <- colwise(as.factor)(l1)
 names(l1)[names(l1) == "sample"] = "Answer.sample"
-
 ```
 
 Filter.
 ```{r}
 l1.exclusion.ns = l1 %>%
-                  summarise(n_badTraining = length(which(t2_a == 0 | t3_a == 0 |
-                                                           t2_b == 0 | t2_b == 0)))
+                  summarise(n_badTraining = length(
+                    which(t2_a == 0 | t3_a == 0 |t2_b == 0 | t2_b == 0)))
 l1.exclusion.ns
 
-# subset data
+# subset data to those with correct training
 l1.f = l1 %>%
        filter(t2_a == 1 & t3_a == 1 & t2_b == 1 & t2_b == 1)
 
@@ -488,52 +404,27 @@ if (strict){
 l1.f$w.ans.cat <- "other"
 l1.f$w.ans.cat[sub] <- "sub"
 l1.f$w.ans.cat[basic] <- "basic"
-
-if (proper){
-  proper <- l1.f$basic1_a == 0 & l1.f$basic2_a == 0 & 
-            l1.f$basic1_b == 0 & l1.f$basic2_b == 0 & 
-            (l1.f$sub1_a == 0 | l1.f$sub2_a == 0 |
-               l1.f$sub1_b == 0 | l1.f$sub2_b == 0)
-  l1.f$w.ans.cat[proper] <- "proper"
-  l1.f$w.ans.cat <- factor(l1.f$w.ans.cat, c("proper","sub","basic","other"))
-} else {
-  l1.f$w.ans.cat <- factor(l1.f$w.ans.cat, c("sub","basic","other"))
-}
+l1.f$w.ans.cat <- factor(l1.f$w.ans.cat, c("sub","basic","other"))
 
 # filter out "other"" responses
 length(which(l1.f$w.ans.cat  == "other"))
 l1.f = l1.f[l1.f$w.ans.cat != "other",]
 l1.f$w.ans.cat = droplevels(l1.f$w.ans.cat)
 
-# get proportions and bootstrapped CIS
-M <- data.frame()
-for (k in 1:length(levels(l1.f$w.ans.cat))){
-    M = rbind(M, ddply(l1.f, .(Answer.sample), 
-                     function (d) {get.prop.CIs(d$w.ans.cat, levels(d$w.ans.cat)[k])}))
-}
-
-l1.f.props = l1.f %>%
-          group_by(Answer.sample, w.ans.cat) %>%
-          summarise (n = n()) %>%
-          mutate(prop = n / sum(n),
-                 exp = "In Lab") %>%
-          left_join(M)
-
-# re-order levels so consistent with other exps
-l1.f.props$Answer.sample <- ordered(l1.f.props$Answer.sample, 
-                    levels = c("teacher", "learner"))
+# get props
+l1.f.props = get_bootstrapped_props(l1.f, "w.ans.cat", "In person")
 ```
 
 ```{r, echo = F}
-ggplot(l1.f.props, aes(x=factor(w.ans.cat), y = prop, fill = Answer.sample)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  geom_linerange(aes(ymin=ciwl, ymax=ciul), position = position_dodge(.9)) +
+ggplot(l1.f.props, aes(x=response.cat, y = prop, fill = Answer.sample)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_linerange(aes(ymin=cill, ymax=ciul), position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
-  ggtitle("In Lab") +
+  ggtitle("In person") +
   themeML + 
-  scale_fill_brewer(name="Sampling\nCondition", palette="Set1")
+  scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
 Stats
@@ -550,7 +441,8 @@ Read in data and pre-process
 t3 <- read.csv("../data/anonymized/turk_replication_3_A.csv")
 
 # make factors
-t3$Answer.sample <- factor(t3$Answer.sample, labels=c('teacher','learner')) # sample0 = teacher, sample1=learner
+t3$Answer.sample <- factor(t3$Answer.sample, 
+                           labels=c('teacher','learner')) # sample0 = teacher, sample1 = learner
 t3 <- colwise(as.factor)(t3)
 ```
 
@@ -560,22 +452,21 @@ t3.exclusion.ns = t3 %>%
               summarise(n_badTraining = length(which(Answer.click1 != "\"correct\"" | 
                                                        Answer.click2 != "\"correct\"")),
                         n_badGeneralize = length(which(Answer.Qcheck1 != 0 | Answer.Qcheck2 != 0)),
-                        n_badFilter = length(which(Answer.question1 != 'TRUE' | Answer.question2 !='TRUE'| 
-                                Answer.question3 != 'TRUE' | Answer.question4 !='TRUE')))
+                        n_badFilter = length(which(Answer.question1 != 'TRUE' | Answer.question2 != 'TRUE'| 
+                                Answer.question3 != 'TRUE' | Answer.question4 != 'TRUE')))
 t3.exclusion.ns
 
 # subset data
-t3.f= t3 %>%
+t3.f = t3 %>%
       filter(Answer.click1 == "\"correct\"" & 
                 Answer.click2 == "\"correct\"") %>% # take out those who click on wrong training items
       filter(Answer.Qcheck1 == 0 & Answer.Qcheck2 == 0) %>% # take out if missed check generalization question
-      filter(Answer.question1 == 'TRUE' & Answer.question2 =='TRUE' & 
-            Answer.question3 == 'TRUE' & Answer.question4 =='TRUE')  # take out those who missed filter question
+      filter(Answer.question1 == 'TRUE' & Answer.question2 == 'TRUE' & 
+            Answer.question3 == 'TRUE' & Answer.question4 == 'TRUE') # take out those who missed filter question
 
 dim(t3)[1] # total
 dim(t3.f)[1] # total with exclusions
 ```
-
 
 Categorize response patterns based on criterion.
 ```{r}
@@ -599,50 +490,28 @@ if (strict){
 t3.f$w.ans.cat <- "other"
 t3.f$w.ans.cat[sub] <- "sub"
 t3.f$w.ans.cat[basic] <- "basic"
-
-if (proper){
-  proper <- (t3.f$Answer.Qproper1 == 1 & t3.f$Answer.Qproper2 == 1 & 
-            t3.f$Answer.Qproper3 == 1) & t3.f$Answer.Qsub1 == 0 &
-            t3.f$Answer.Qsub2 == 0 & t3.f$Answer.Qbasic1 == 0 &
-            t3.f$Answer.Qbasic2 == 0 & t3.f$Answer.Qbasic3 == 0 
-  
-  t3.f$w.ans.cat[proper] <- "proper"
-  t3.f$w.ans.cat = factor(t3.f$w.ans.cat, levels=c("proper", "sub", "basic", "other"))
-} else { 
-  t3.f$w.ans.cat = factor(t3.f$w.ans.cat, levels=c("sub", "basic", "other"))
-}
+t3.f$w.ans.cat = factor(t3.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
 # filter out "other"" responses
 length(which(t3.f$w.ans.cat == "other"))
 t3.f = t3.f[t3.f$w.ans.cat != "other",]
 t3.f$w.ans.cat = droplevels(t3.f$w.ans.cat)
 
-# get proportions and bootstrapped CIS
-M <- data.frame()
-for (k in 1:length(levels(t3.f$w.ans.cat))){
-    M = rbind(M, ddply(t3.f, .(Answer.sample), 
-                     function (d) {get.prop.CIs(d$w.ans.cat, levels(d$w.ans.cat)[k])}))
-}
-
-t3.f.props = t3.f %>%
-          group_by(Answer.sample, w.ans.cat) %>%
-          summarise (n = n()) %>%
-          mutate(prop = n / sum(n),
-                 exp = "Turk #3") %>%
-          left_join(M)
+# get props
+t3.f.props = get_bootstrapped_props(t3.f, "w.ans.cat", "Turk #3")
 ```
 
 ```{r,echo = F}
-ggplot(t3.f.props, aes(x = factor(w.ans.cat), y = prop, fill = Answer.sample)) +
+ggplot(t3.f.props, aes(x = response.cat, y = prop, fill = Answer.sample)) +
   geom_bar(stat = "identity", position=position_dodge()) +
-  geom_linerange(aes(ymin = ciwl,ymax = ciul), position = position_dodge(.9)) +
+  geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
   ggtitle("Turk Replication #3") +
   themeML + 
-  theme(legend.position = c(.85,.8)) + 
-    scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
+  theme(legend.position = c(.85, .8)) + 
+  scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
 Stats
@@ -652,14 +521,15 @@ chisq.test(t3_tab)
 ```
 
 <a name="t4"/>
-<h3> Experiment 5 - Turk Replication #5 </h3>
+<h3> Experiment 5 - Turk Replication #4 </h3>
 
 Read in data and pre-process
-
 ```{r}
 t4 <- read.csv("../data/anonymized/turk_replication_4_A.csv")
+
 # make factors
-t4$Answer.sample <- factor(t4$Answer.sample, labels=c('teacher','learner')) # sample0 = teacher, sample1=learner
+t4$Answer.sample <- factor(t4$Answer.sample, 
+                           labels = c('teacher','learner')) # sample0 = teacher, sample1 = learner
 t4 <- colwise(as.factor)(t4)
 ```
 
@@ -678,13 +548,12 @@ t4.f= t4 %>%
       filter(Answer.click1 == "\"correct\"" & 
                 Answer.click2 == "\"correct\"") %>% # take out those who click on wrong training items
       filter(Answer.Qcheck1 == 0 & Answer.Qcheck2 == 0) %>% # take out if missed check generalization question
-      filter(Answer.question1 == 'TRUE' & Answer.question2 =='TRUE' & 
-            Answer.question3 == 'TRUE' & Answer.question4 =='TRUE')  # take out those who missed filter question
+      filter(Answer.question1 == 'TRUE' & Answer.question2 == 'TRUE' & 
+            Answer.question3 == 'TRUE' & Answer.question4 == 'TRUE')  # take out those who missed filter question
 
 dim(t4)[1] # total
 dim(t4.f)[1] # total with exclusions
 ```
-
 
 Categorize response patterns based on criterion.
 ```{r}
@@ -708,50 +577,28 @@ if (strict){
 t4.f$w.ans.cat <- "other"
 t4.f$w.ans.cat[sub] <- "sub"
 t4.f$w.ans.cat[basic] <- "basic"
-
-if (proper){
-  proper <- (t4.f$Answer.Qproper1 == 1 & t4.f$Answer.Qproper2 == 1 & 
-            t4.f$Answer.Qproper3 == 1) & t4.f$Answer.Qsub1 == 0 &
-            t4.f$Answer.Qsub2 == 0 & t4.f$Answer.Qbasic1 == 0 &
-            t4.f$Answer.Qbasic2 == 0 & t4.f$Answer.Qbasic3 == 0 
-  
-  t4.f$w.ans.cat[proper] <- "proper"
-  t4.f$w.ans.cat = factor(t4.f$w.ans.cat, levels=c("proper", "sub", "basic", "other"))
-} else { 
-  t4.f$w.ans.cat = factor(t4.f$w.ans.cat, levels=c("sub", "basic", "other"))
-}
+t4.f$w.ans.cat = factor(t4.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
 # filter out "other"" responses
 length(which(t4.f$w.ans.cat == "other"))
 t4.f = t4.f[t4.f$w.ans.cat != "other",]
 t4.f$w.ans.cat = droplevels(t4.f$w.ans.cat)
 
-# get proportions and bootstrapped CIS
-M <- data.frame()
-for (k in 1:length(levels(t4.f$w.ans.cat))){
-    M = rbind(M, ddply(t4.f, .(Answer.sample), 
-                     function (d) {get.prop.CIs(d$w.ans.cat, levels(d$w.ans.cat)[k])}))
-}
-
-t4.f.props = t4.f %>%
-          group_by(Answer.sample, w.ans.cat) %>%
-          summarise (n = n()) %>%
-          mutate(prop = n / sum(n),
-                 exp = "Turk #4") %>%
-          left_join(M)
+# get props
+t4.f.props = get_bootstrapped_props(t4.f, "w.ans.cat", "Turk #4")
 ```
 
 ```{r,echo = F}
-ggplot(t4.f.props, aes(x = factor(w.ans.cat), y = prop, fill = Answer.sample)) +
-  geom_bar(stat = "identity", position=position_dodge()) +
-  geom_linerange(aes(ymin = ciwl,ymax = ciul), position = position_dodge(.9)) +
+ggplot(t4.f.props, aes(x = response.cat, y = prop, fill = Answer.sample)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
   ggtitle("Turk Replication #4") +
   themeML + 
   theme(legend.position = c(.85,.8)) + 
-    scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
+  scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
 Stats
@@ -765,66 +612,14 @@ chisq.test(t4_tab)
 
 All proportions
 ```{r}
-# bind all props together
-lf.props = rbind(t1.f.props, t2.f.props, t3.f.props, t4.f.props, l1.f.props)
-lf.props$ps.boot <- NULL
-all.props= rbind(lf.props, xt.a.props, xt.c.props)
-
-all.props$exp <- ordered(as.factor(all.props$exp), 
-                    levels = c( "X&T (2007b) children", "X&T (2007b)", "Turk #1", 
-                                "Turk #2", "In Lab", "Turk #3",  "Turk #4" ))
-
-all.props$exp = revalue(all.props$exp, c("X&T (2007b)" = "X&T adults", "X&T (2007b) children" = "X&T children", "Turk #1" = "Exp. 1", "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", "Turk #3" = "Exp. 4", "Turk #4" = "Exp. 5"))
-all.props$w.ans.cat  = revalue(all.props$w.ans.cat , c("sub" = "sub."))
-
-all.props.crit = all.props[all.props$w.ans.cat == "basic" | all.props$w.ans.cat == "sub.",]
-```
-
-```{r, fig.width = 10, echo = F}
-#pdf("../writeup/figures/FIG_2.pdf", height = 4, width = 12)
-ggplot(all.props.crit, aes(x = w.ans.cat, y = prop, 
-                           fill = Answer.sample)) +
-  geom_bar(stat="identity", position = position_dodge()) +
-  facet_grid(. ~ exp) +
-  geom_rect(data = all.props.crit[21:28,], fill = "gray", 
-            xmin = -Inf,xmax = Inf, ymin = -Inf,
-            ymax = Inf, alpha = 0.07) +
-  geom_linerange(aes(ymin = ciwl,ymax = ciul), position=position_dodge(.9)) +
-  ylim(0, 1) +
-  ylab("Prop. Participants") +
-  xlab("Generalization Pattern") +
-  themeML + 
-  scale_fill_brewer(name ="Sampling\nCondition", palette = "Set1") 
-#dev.off()
-```
-
-All effect sizes
-```{r}
-# get cohen's d effect sizes
-t1.f.es = d.fc(t1.f$w.ans.cat, t1.f$Answer.sample)
-t2.f.es = d.fc(t2.f$w.ans.cat, t2.f$Answer.sample)
-t3.f.es = d.fc(t3.f$w.ans.cat, t3.f$Answer.sample)
-t4.f.es = d.fc(t4.f$w.ans.cat, t4.f$Answer.sample)
-l1.f.es= d.fc(l1.f$w.ans.cat, l1.f$Answer.sample)
-xt.a.es  = d.fc(xt_data.adults$response, xt_data.adults$Answer.sample)
-xt.c.es = d.fc(xt_data.children$response, xt_data.children$Answer.sample)
-
-all.es = rbind(t1.f.es, t2.f.es, t3.f.es, t4.f.es, l1.f.es, xt.a.es, xt.c.es)
-all.es$exp = c("Turk #1" ,"Turk #2", "Turk #3", "Turk #4", "In Lab",
-               "X&T adults", "X&T children")
-all.es$exp = revalue(all.es$exp, c( "Turk #1" = "Exp. 1",
-                                "Turk #2" = "Exp. 2", "In Lab" = "Exp. 3", 
-                                "Turk #3" = "Exp. 4", "Turk #4" = "Exp. 5"))
-names(all.es)[1] = "effect_size_d"
-
-# merge together all raw data so can also get log odds ratio
+# merge together all raw data 
 xt_data.adults$exp = "X&T adults"
 xt_data.children$exp = "X&T children"
 t1.f$exp = "Exp. 1"
 t2.f$exp = "Exp. 2"
+l1.f$exp = "Exp. 3"
 t3.f$exp = "Exp. 4"
 t4.f$exp = "Exp. 5"
-l1.f$exp = "Exp. 3"
 xt_data.adults$w.ans.cat = xt_data.adults$response
 xt_data.children$w.ans.cat = xt_data.children$response
 
@@ -837,45 +632,71 @@ all.data.f = rbind(xt_data.children[,c("Answer.sample", "w.ans.cat", "exp")],
                    t4.f[,c("Answer.sample", "w.ans.cat", "exp")])
 all.data.f <- colwise(as.factor)(all.data.f)
 
-# get count by conditions
-all.data.f.counts = all.data.f %>%
-                    group_by(exp, Answer.sample, w.ans.cat) %>%
-                    summarise(counts = n())
-all.data.f.counts.short = dcast(all.data.f.counts, value = counts, 
-                                exp ~ Answer.sample + w.ans.cat, mean)
-all.data.f.counts.short$n = rowSums(all.data.f.counts.short[,2:5])
+# get props by experiment
+all.data.f.props = all.data.f %>%
+                    group_by(exp) %>%
+                    do(get_bootstrapped_props(.,"w.ans.cat", .$exp[1])) 
 
-# get log odds ratio
-all.lor = escalc(measure = "OR", ai = learner_basic, bi = learner_sub, 
-       ci = teacher_basic, di = teacher_sub, 
-       data = all.data.f.counts.short, append = TRUE) # this is uncorrected log odds ratio
-names(all.lor)[7] = "effect_size_lor"
-names(all.lor)[8] = "var_lor"
+# re-order experiments
+all.data.f.props$exp = factor(all.data.f.props$exp,
+                           levels(all.data.f.props$exp)[c(7, 6, 1:5)]) 
+```
 
-all.es = left_join(all.es, all.lor, by="exp")
+```{r, fig.width = 12, echo = F}
+all.data.f.props$response.cat  = revalue(all.data.f.props$response.cat, c("sub" = "sub."))
 
-all.es$exp <- ordered(as.factor(all.es$exp ), 
-                    levels = c( "X&T children", "X&T adults", "Exp. 1", 
-                                "Exp. 2", "Exp. 3", "Exp. 4",  "Exp. 5" ))
-all.es = all.es[c(7, 6, 1,2,5, 3, 4),]
+#pdf("../writeup/figures/FIG_2.pdf", height = 4, width = 12)
+ggplot(all.data.f.props, aes(x = response.cat, y = prop, 
+                           fill = Answer.sample)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  facet_grid(. ~ exp) +
+  geom_rect(data = all.data.f.props[21:28,], fill = "gray", 
+            xmin = -Inf,xmax = Inf, ymin = -Inf,
+            ymax = Inf, alpha = 0.07) +
+  geom_linerange(aes(ymin = cill,ymax = ciul), position = position_dodge(.9)) +
+  ylim(0, 1) +
+  ylab("Prop. Participants") +
+  xlab("Generalization Pattern") +
+  themeML + 
+  scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1") 
+#dev.off()
+```
 
-## fixed effects
-# cohen's d
-fixed.effects.d = rma(effect_size_d, var_d, data = all.es, method = "FE")
-forest(fixed.effects.d, slab=all.es$exp,   mlab = "FE estimate in d")
+All effect sizes
+```{r}
+# spread props and n_cond
+all.data.f.props.basic= all.data.f.props %>%
+                        filter(response.cat == "basic") %>%
+                        select(-cill, -ciul, -response.cat, -prop, -n) %>%
+                        spread(Answer.sample, n_cond, fill = F) %>%
+                        rename(teacher_n = teacher, learner_n = learner)
 
-# lor
-fixed.effects.lor = rma(effect_size_lor, var_lor, data = all.es, method = "FE")
-forest(fixed.effects.lor, slab=all.es$exp,mlab = "FE estimate in log odds")
+all.data.f.props.basic = all.data.f.props  %>% 
+                        filter(response.cat == "basic") %>%
+                        select(-cill, -ciul, -response.cat, -n_cond, -n) %>%
+                        spread(Answer.sample, prop, fill = F) %>%
+                        rename(teacher_prop = teacher, learner_prop = learner) %>%
+                        left_join(all.data.f.props.basic)
 
-## random effects
-# cohen's d
-random.effects.d = rma(effect_size_d, var_d, data = all.es)
-forest(random.effects.d, slab=all.es$exp,   mlab = "RE estimate in d")
+# get all effect sizes
+all.es = propes(all.data.f.props.basic$learner_prop, 
+           all.data.f.props.basic$teacher_prop, 
+           all.data.f.props.basic$learner_n,
+           all.data.f.props.basic$teacher_n, 
+           verbose = F)
 
-# lor
-random.effects.lor = rma(effect_size_lor, var_lor, data = all.es)
-forest(random.effects.lor, slab=all.es$exp, mlab = "RE estimate in log odds")
+all.es$exp = all.data.f.props.basic$exp # add exp ids
+```
+
+Estimate effect sizes
+```{r}
+# fixed effects
+fixed.effects.d = rma(d, var.d, data = all.es, method = "FE")
+fixed.effects.d
+
+# random effects
+random.effects.d = rma(d, var.d, data = all.es)
+random.effects.d
 ```
 
 ```{r, echo = F}
@@ -892,88 +713,23 @@ text(5.8, 8.55, "Cohen's d [95% CI]")
 addpoly(random.effects.d, row= -1, cex=.75, 
         annotate = F,  col = "red", mlab = "", efac = 2)
 #dev.off()
-
-
 ```
 
 <a name="power5"/>
-<h3> Power analysis, based on effect size estimated from Exps 1-4 and XT-Adult </h3>
+<h3> Power analysis for Exp. 5 </h3>
+<h4> (based on effect size estimated from Exps 1-4 and X&T-adult) </h4>
 ```{r}
 # fixed effects
-fixed.effects = rma(effect_size_d, var_d, data = all.es[2:6,], method = "FE")
+fixed.effects = rma(d, var.d, data = all.es[2:6,], method = "FE")
 power.analysis = pwr.chisq.test(w = fixed.effects$b, df = 1, 
                                 sig.level = 0.05, power = .95)
 power.analysis
 print(paste("N for .95 power (fixed effects):", power.analysis$N))
 
 # random effects
-random.effects = rma(effect_size_d , var_d, data = all.es[2:6,])#
+random.effects = rma(d , var.d, data = all.es[2:6,])
 power.analysis = pwr.chisq.test(w = random.effects$b, df = 1, 
                                 sig.level = 0.05, power = .95)
 power.analysis
 print(paste("N for .95 power (random effects):", power.analysis$N))
 ```
-
-
-
-```{r, include = F, eval = F}
-# Mikes Forrest
-  f <- fitted(rma(effect_size, var_d, data = all.es))
-  p <- predict(rma(effect_size, var_d, data = all.es))
-  
-   forest_data <- data.frame(effects = as.numeric(model()$yi.f),
-                              variances = model()$vi.f) %>%
-      mutate(effects.cil = effects - qnorm(alpha/2, lower.tail = FALSE) * sqrt(variances),
-             effects.cih = effects + qnorm(alpha/2, lower.tail = FALSE) * sqrt(variances),
-             estimate = as.numeric(f),
-             unique_ID = names(f),
-             estimate.cil = p$ci.lb,
-             estimate.cih = p$ci.ub,
-             identity = 1) %>%
-      left_join(mutate(data(), unique_ID = make.unique(unique_ID))) %>%
-      arrange(desc(effects)) %>%
-      mutate(unique_ID = factor(unique_ID, levels = unique_ID))
-
-    qplot(exp, effect_size, ymin = cill, ymax = ciul,
-          geom = "linerange",
-          data = all.es) +
-      #geom_point(aes(y = effect_size, size = n)) +
-      geom_point(aes(y = effect_size)) +
-      #geom_pointrange(aes(x = exp,
-       #             y = effect_size,
-        #            ymin = cill,
-        #            ymax = ciul),
-        #        col = "red") +
-      coord_flip() +
-      scale_size_continuous(name = "N") +
-      scale_colour_manual(values = c("data" = "black", "model" = "red")) +
-      xlab("") +
-      ylab("Effect Size") +
-      theme_bw() +
-      theme(text = element_text(family = font))
-    
-# get count data
-all.data.f_tab = table(all.data.f$w.ans.cat, 
-                       all.data.f$Answer.sample)[c("sub", "basic"),]
-# get effect size
-all.es.mean = d.fc(all.data.f$w.ans.cat, all.data.f$Answer.sample)
-print(paste("Effect size:", all.es.mean[1]))
-
-power.analysis = pwr.chisq.test(w = all.es.mean[1],df = 1, sig.level = 0.05, power = .95)
-
-power.analysis 
-
-print(paste("N for .95 power (raw average):", power.analysis$N))
-
-#pdf("../../writeup/figures/FIG_3.pdf", height = 4, width = 4)
-ggplot(all.es, aes(x = exp, y = effect_size_d, ymin = cill, ymax = ciul)) + 
-  geom_pointrange(position = position_dodge(width = 0.25), size = .8) + 
-  ylab("Effect Size") + 
-  xlab("Experiment") + 
-  geom_hline(y = 0, linetype = "dotted") +
-  theme(text = element_text(size = 16)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  coord_flip() 
-#dev.off()
-```
-
