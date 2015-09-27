@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  27 SEP 2015 15:25
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  27 SEP 2015 16:21
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -307,9 +307,12 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
 
 ]
 [2]
+
+LaTeX Warning: Citation `xu2007' undefined on input line 40.
+
 LaTeX Font Info:    Try loading font information for OT1+ptmcm on input line 44
 .
- (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/ot1ptmcm.fd
+(/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/ot1ptmcm.fd
 File: ot1ptmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ptmcm.
 )
 LaTeX Font Info:    Try loading font information for OML+ptmcm on input line 44
@@ -337,9 +340,28 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 44.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [3] [4]
+) [3]
+
+LaTeX Warning: Citation `xu2007word' undefined on input line 46.
+
+
+LaTeX Warning: Citation `jenkins2015non' undefined on input line 46.
+
+
+LaTeX Warning: Citation `spencer2011' undefined on input line 46.
+
+
+LaTeX Warning: Citation `navarro2012sampling' undefined on input line 46.
+
+
+LaTeX Warning: Citation `reproProj2015' undefined on input line 46.
+
+[4]
 
 LaTeX Warning: Citation `xu2007a' undefined on input line 52.
+
+
+LaTeX Warning: Reference `fig:stims' on page 5 undefined on input line 61.
 
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 61.
@@ -353,16 +375,47 @@ File: figures/stims.png Graphic file (type png)
 Package pdftex.def Info: figures/stims.png used on input line 64.
 (pdftex.def)             Requested size: 361.34999pt x 92.54852pt.
 
+Underfull \hbox (badness 3803) in paragraph at lines 65--65
+[]\OT1/ptm/m/it/10.95 Figure 1\OT1/ptm/m/n/10.95 . []Sam-ple stim-uli used in E
+x-per-i-ments 1-3 (left) and Ex-per-i-ment 4 and 5
+ []
+
+
+Underfull \hbox (badness 1845) in paragraph at lines 65--65
+\OT1/ptm/m/n/10.95 (right). The Ex-per-i-ment 4 and 5 stim-uli are in-tended to
+ be max-i-mally sim-i-lar to the
+ []
+
+
+Underfull \hbox (badness 1430) in paragraph at lines 65--65
+\OT1/ptm/m/n/10.95 orig-i-nal Xu and Tenen-baum (2007b) stim-uli, with lower su
+bordinate-level vari-abil-ity than
+ []
+
+
+Underfull \hbox (badness 2799) in paragraph at lines 65--65
+\OT1/ptm/m/n/10.95 the stim-uli used in Ex-per-i-ments 1-3. The full set of sti
+m-uli can be ac-cessed here:
+ []
+
 <figures/screen.png, id=23, 522.2712pt x 253.9086pt>
 File: figures/screen.png Graphic file (type png)
  <use figures/screen.png>
 Package pdftex.def Info: figures/screen.png used on input line 72.
 (pdftex.def)             Requested size: 397.48499pt x 193.2476pt.
 
-[5] [6 <./figures/stims.png>] [7 <./figures/screen.png>]
-<figures/FIG_2.pdf, id=36, 867.24pt x 289.08pt>
+[5]
+
+LaTeX Warning: Reference `fig:screen' on page 6 undefined on input line 84.
+
+[6 <./figures/stims.png>]
+
+LaTeX Warning: Reference `fig:screen' on page 7 undefined on input line 88.
+
+[7 <./figures/screen.png>] <figures/FIG_2.pdf, id=36, 867.24pt x 289.08pt>
 File: figures/FIG_2.pdf Graphic file (type pdf)
- <use figures/FIG_2.pdf>
+
+<use figures/FIG_2.pdf>
 Package pdftex.def Info: figures/FIG_2.pdf used on input line 96.
 (pdftex.def)             Requested size: 448.07378pt x 149.36086pt.
 
@@ -370,20 +423,63 @@ Overfull \hbox (14.45378pt too wide) in paragraph at lines 96--97
  [] 
  []
 
-[8 <./figures/FIG_2.pdf>] <figures/FIG_3.pdf, id=49, 578.16pt x 361.35pt>
-File: figures/FIG_3.pdf Graphic file (type pdf)
+[8 <./figures/FIG_2.pdf>]
 
-<use figures/FIG_3.pdf>
+LaTeX Warning: Reference `fig:bar_plots' on page 9 undefined on input line 105.
+
+
+
+LaTeX Warning: Reference `fig:effect_sizes' on page 9 undefined on input line 1
+05.
+
+<figures/FIG_3.pdf, id=49, 578.16pt x 361.35pt>
+File: figures/FIG_3.pdf Graphic file (type pdf)
+ <use figures/FIG_3.pdf>
 Package pdftex.def Info: figures/FIG_3.pdf used on input line 109.
 (pdftex.def)             Requested size: 433.62pt x 271.01184pt.
- [9] [10 <./figures/FIG_3.pdf>] [11] [12] [13] [14]
+
+[9] [10 <./figures/FIG_3.pdf>] [11]
+
+LaTeX Warning: Reference `fig:bar_plots' on page 12 undefined on input line 145
+.
+
+
+LaTeX Warning: Reference `fig:effect_sizes' on page 12 undefined on input line 
+145.
+
+[12] [13]
+
+LaTeX Warning: Reference `fig:stims' on page 14 undefined on input line 171.
+
+[14]
+
+LaTeX Warning: Citation `Viechtbauer2010' undefined on input line 206.
+
 [15]
 
-LaTeX Warning: Citation `bonowitz2011double' undefined on input line 228.
+LaTeX Warning: Citation `bonowitz2011double' undefined on input line 230.
+
+
+LaTeX Warning: Citation `markman1988' undefined on input line 233.
+
+
+LaTeX Warning: Citation `clark1987principle' undefined on input line 233.
+
+
+LaTeX Warning: Citation `clark1988logic' undefined on input line 233.
+
+
+LaTeX Warning: Citation `heider1944' undefined on input line 235.
 
 [16] [17]
 
-Class apa Warning: \bibliographystyle command ignored on input line 293.
+LaTeX Warning: Citation `re2013' undefined on input line 287.
+
+
+LaTeX Warning: Citation `sanchez2003effect' undefined on input line 288.
+
+
+Class apa Warning: \bibliographystyle command ignored on input line 295.
 
 (./xtSampRep.bbl [18] [19
 
@@ -391,15 +487,18 @@ Class apa Warning: \bibliographystyle command ignored on input line 293.
 
 LaTeX Warning: There were undefined references.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 3666 strings out of 493093
- 48602 string characters out of 6134989
- 116291 words of memory out of 5000000
- 7041 multiletter control sequences out of 15000+600000
+ 3656 strings out of 493093
+ 48417 string characters out of 6134989
+ 115784 words of memory out of 5000000
+ 7031 multiletter control sequences out of 15000+600000
  41877 words of font info for 104 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 38i,9n,35p,1328b,275s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 38i,9n,35p,1325b,275s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2015/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texl
@@ -409,7 +508,7 @@ texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texlive/2015/texmf-dist/
 fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type
 1/urw/times/utmr8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/time
 s/utmri8a.pfb>
-Output written on xtSampRep.pdf (20 pages, 623421 bytes).
+Output written on xtSampRep.pdf (20 pages, 624159 bytes).
 PDF statistics:
  124 PDF objects out of 1000 (max. 8388607)
  85 compressed objects within 1 object stream
