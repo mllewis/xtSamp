@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  24 SEP 2015 18:05
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  27 SEP 2015 10:59
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -383,20 +383,20 @@ LaTeX Warning: Citation `bonowitz2011double' undefined on input line 225.
 
 [16] [17]
 
-Class apa Warning: \bibliographystyle command ignored on input line 284.
+Class apa Warning: \bibliographystyle command ignored on input line 285.
 
-(./xtSampRep.bbl [18]) [19
+(./xtSampRep.bbl [18] [19
 
-] (./xtSampRep.aux)
+]) [20] (./xtSampRep.aux)
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 3663 strings out of 493093
- 48571 string characters out of 6134989
- 116226 words of memory out of 5000000
- 7038 multiletter control sequences out of 15000+600000
+ 3666 strings out of 493093
+ 48602 string characters out of 6134989
+ 116291 words of memory out of 5000000
+ 7041 multiletter control sequences out of 15000+600000
  41877 words of font info for 104 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,9n,35p,1328b,275s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -409,10 +409,10 @@ texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texlive/2015/texmf-dist/
 fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type
 1/urw/times/utmr8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/time
 s/utmri8a.pfb>
-Output written on xtSampRep.pdf (19 pages, 622299 bytes).
+Output written on xtSampRep.pdf (20 pages, 622908 bytes).
 PDF statistics:
- 121 PDF objects out of 1000 (max. 8388607)
- 83 compressed objects within 1 object stream
+ 124 PDF objects out of 1000 (max. 8388607)
+ 85 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  21 words of extra memory for PDF output out of 10000 (max. 10000000)
 

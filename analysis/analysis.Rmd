@@ -23,7 +23,7 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 ***
 ***
 
-```{r include = F}
+```{r setup, include = F}
 
 rm(list = ls())
 
@@ -40,12 +40,12 @@ library(tidyr)
 
 # set graphical parameters
 fs = 18
-ts = 20
+ts = 18
 
 # define helper functions
 theme_set(theme_bw())
 themeML = theme(text = element_text(size = fs),
-                plot.title=element_text(size=ts, face = "bold"),
+                plot.title = element_text(size = ts, face = "bold"),
                 plot.background = element_blank(),
                 panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
@@ -56,9 +56,12 @@ get_bootstrapped_props <- function(df, conditionName, expName){
   
   names(df)[which(names(df) == conditionName)] = "response.cat"
   
+  df$response.cat = ordered(df$response.cat, levels = c("basic", "sub"))
+  df$Answer.sample = ordered(df$Answer.sample, levels = c("learner", "teacher"))
+
   df = df %>%
-    mutate(w.ans.cat.sub = as.numeric(response.cat)-1,
-           w.ans.cat.b = 1-(as.numeric(response.cat))+1) %>%
+    mutate(w.ans.cat.sub = as.numeric(response.cat) - 1,
+           w.ans.cat.b = 1 - as.numeric(response.cat) + 1) %>%
     group_by(Answer.sample)
   
   ns = df %>% 
@@ -76,7 +79,7 @@ get_bootstrapped_props <- function(df, conditionName, expName){
   props = multi_boot_standard(df, column = "w.ans.cat.sub") %>%
     mutate(response.cat = "sub") %>%
     rbind(props) %>%
-    left_join(ns, by=c("response.cat", "Answer.sample")) %>%
+    left_join(ns, by = c("response.cat", "Answer.sample")) %>%
     left_join(ns_cond, by = c("Answer.sample"))
     
   props$response.cat = as.factor(props$response.cat)
@@ -92,25 +95,25 @@ get_bootstrapped_props <- function(df, conditionName, expName){
 opts_chunk$set(echo = T, message = F, warning = F, error = F, cache = F)
 ```
 
-There are different possible criteria  for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently across questions as either a subordinate or a basic generalizer for each of the two trials. In contrast, we observed a wide variety of responses across questions by participants in our sample. Thus, we adopt two criteria in analyzing our data: a "strict" criteria where we only include participants if they responded consistently ("yes" or "no" to all basic-level questions and "yes" or "no" to all subordinate level questions), and a "liberal" criteria where we counted a particpant as a basic generalizer if they responded "yes" to any of the basic level questions. The results of the liberal criteria are reported in the Main Text, and the results of the strict criteria are reported in Appendix A.
+There are different possible criteria  for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently across questions as either a subordinate or a basic generalizer for each of the two trials. In contrast, we observed varied responses across questions by participants in our sample. Thus, we adopt two criteria in analyzing our data: a "strict" criteria where we only include participants if they responded consistently ("yes" or "no" to all basic-level questions and "yes" or "no" to all subordinate level questions), and a "liberal" criteria where we counted a particpant as a basic generalizer if they responded "yes" to any of the basic level questions. The results of the liberal criteria are reported in the Main Text, and the results of the strict criteria are reported in Appendix A.
 
-```{r, echo = F}
+```{r strict, echo = F}
 # Make global analytical decisions
 strict = TRUE
 print(paste("Strict criteria: ", strict))
 ```
 
-<a name="o"/>
-<h3> Original Xu and Tenenbaum 2007b </h3>
+<a name = "o"/>
+<h3> Original Xu and Tenenbaum (2007b) </h3>
 
 X&T 2007b data - adults
-```{r}
+```{r xt_adults}
 N = 14
 N_per_condition = N/2  # 2 conditions (teacher + learner)
 # Note: The proportions described in the original report were obtained by aggregating across *trials* not participants (2 trials/participant). We correct for this here by taking the proportion of participants, which results in slightly different proportions than those reported in the original paper.
 
 # make raw data
-prop_sub_teacher= .928 
+prop_sub_teacher = .928 
 n_sub_teacher = round(prop_sub_teacher * N_per_condition)
 n_basic_teacher = N_per_condition - n_sub_teacher 
 teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher),
@@ -122,7 +125,7 @@ n_basic_learner = N_per_condition - n_sub_learner
 learner_xt_data = as.factor(c(rep("sub", n_sub_learner), 
                               rep("basic", n_basic_learner)))
 
-xt_data.adults = data.frame(response=c(as.character(teacher_xt_data),
+xt_data.adults = data.frame(response = c(as.character(teacher_xt_data),
                                        as.character(learner_xt_data)))
 xt_data.adults$Answer.sample[1:N_per_condition] = "teacher"
 xt_data.adults$Answer.sample[(N_per_condition + 1):
@@ -133,12 +136,12 @@ xt.a.props = get_bootstrapped_props(xt_data.adults, "response", "X&T (2007b) adu
 ```
 
 X&T 2007b data - children
-```{r}
+```{r xt_children}
 N = 24
 N_per_condition = N/2 # 2 conditions
 
 # make raw data
-prop_sub_teacher= .71
+prop_sub_teacher = .71
 n_sub_teacher = round(prop_sub_teacher * N_per_condition)
 n_basic_teacher = N_per_condition - n_sub_teacher 
 teacher_xt_data = as.factor(c(rep("sub", n_sub_teacher),
@@ -150,7 +153,7 @@ n_basic_learner = N_per_condition - n_sub_learner
 learner_xt_data = as.factor(c(rep("sub", n_sub_learner), 
                               rep("basic", n_basic_learner)))
 
-xt_data.children = data.frame(response=c(as.character(teacher_xt_data),
+xt_data.children = data.frame(response = c(as.character(teacher_xt_data),
                                        as.character(learner_xt_data)))
 xt_data.children$Answer.sample[1:N_per_condition] = "teacher"
 xt_data.children$Answer.sample[(N_per_condition + 1):
@@ -180,11 +183,11 @@ ggplot(xt, aes(x = response.cat, y = prop, fill = Answer.sample)) +
   themeML  
 ```
 
-<a name="t1"/>
+<a name = "t1"/>
 <h3> Experiment 1 </h3>
 
 Read in data and pre-process.
-```{r}
+```{r exp1}
 t1 = read.csv("../data/anonymized/turk_replication_1_A.csv")
 
 # make factors
@@ -265,17 +268,17 @@ t1_tab = table(t1.f$w.ans.cat, t1.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t1_tab)
 ```
 
-<a name="t2"/>
+<a name = "t2"/>
 <h3> Experiment 2 </h3>
 
 Read in data and pre-process
-```{r}
-t2 <- read.csv("../data/anonymized/turk_replication_2_A.csv", header=T)
+```{r exp2}
+t2 <- read.csv("../data/anonymized/turk_replication_2_A.csv", header = T)
 t2  <- t2 [,c(-1:-19,-21:-32,-36,-41:-43,-54:-55,-56)] # remove unnecessary columns
 
 # make factors
 t2$Answer.sample <- factor(t2$Answer.sample,
-                           labels=c('teacher','learner')) # sample0 = teacher, sample1 = learner
+                           labels = c('teacher','learner')) # sample0 = teacher, sample1 = learner
 t2 <- colwise(as.factor)(t2)
 ```
 
@@ -359,7 +362,7 @@ chisq.test(t2_tab)
 <a name="l1"/>
 <h3> Experiment 3 - In Person Replication </h3>
 
-```{r}
+```{r exp3}
 l1 <- read.csv("../data/anonymized/inlab_replication.csv")
 
 # make factors
@@ -433,11 +436,11 @@ l1_tab = table(l1.f$w.ans.cat, l1.f$sample)[c("sub", "basic"),]
 chisq.test(l1_tab)
 ```
 
-<a name="t3"/>
+<a name = "t3"/>
 <h3> Experiment 4 - Turk Replication #3 </h3>
 
 Read in data and pre-process
-```{r}
+```{r exp4}
 t3 <- read.csv("../data/anonymized/turk_replication_3_A.csv")
 
 # make factors
@@ -501,7 +504,7 @@ t3.f$w.ans.cat = droplevels(t3.f$w.ans.cat)
 t3.f.props = get_bootstrapped_props(t3.f, "w.ans.cat", "Turk #3")
 ```
 
-```{r,echo = F}
+```{r, echo = F}
 ggplot(t3.f.props, aes(x = response.cat, y = prop, fill = Answer.sample)) +
   geom_bar(stat = "identity", position=position_dodge()) +
   geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
@@ -520,11 +523,11 @@ t3_tab = table(t3.f$w.ans.cat, t3.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t3_tab)
 ```
 
-<a name="t4"/>
+<a name = "t4"/>
 <h3> Experiment 5 - Turk Replication #4 </h3>
 
 Read in data and pre-process
-```{r}
+```{r exp5}
 t4 <- read.csv("../data/anonymized/turk_replication_4_A.csv")
 
 # make factors
@@ -544,12 +547,12 @@ t4.exclusion.ns = t4 %>%
 t4.exclusion.ns
 
 # subset data
-t4.f= t4 %>%
+t4.f = t4 %>%
       filter(Answer.click1 == "\"correct\"" & 
                 Answer.click2 == "\"correct\"") %>% # take out those who click on wrong training items
       filter(Answer.Qcheck1 == 0 & Answer.Qcheck2 == 0) %>% # take out if missed check generalization question
       filter(Answer.question1 == 'TRUE' & Answer.question2 == 'TRUE' & 
-            Answer.question3 == 'TRUE' & Answer.question4 == 'TRUE')  # take out those who missed filter question
+            Answer.question3 == 'TRUE' & Answer.question4 == 'TRUE')# take out those who missed filter question
 
 dim(t4)[1] # total
 dim(t4.f)[1] # total with exclusions
@@ -588,7 +591,7 @@ t4.f$w.ans.cat = droplevels(t4.f$w.ans.cat)
 t4.f.props = get_bootstrapped_props(t4.f, "w.ans.cat", "Turk #4")
 ```
 
-```{r,echo = F}
+```{r, echo = F}
 ggplot(t4.f.props, aes(x = response.cat, y = prop, fill = Answer.sample)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
@@ -607,11 +610,11 @@ t4_tab = table(t4.f$w.ans.cat, t4.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t4_tab)
 ```
 
-<a name="all"/>
+<a name = "all"/>
 <h3> All experiments </h3>
 
 All proportions
-```{r}
+```{r all_props}
 # merge together all raw data 
 xt_data.adults$exp = "X&T adults"
 xt_data.children$exp = "X&T children"
@@ -647,11 +650,11 @@ all.data.f.props$response.cat  = revalue(all.data.f.props$response.cat, c("sub" 
 
 #pdf("../writeup/figures/FIG_2.pdf", height = 4, width = 12)
 ggplot(all.data.f.props, aes(x = response.cat, y = prop, 
-                           fill = Answer.sample)) +
+                             fill = Answer.sample)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   facet_grid(. ~ exp) +
   geom_rect(data = all.data.f.props[21:28,], fill = "gray", 
-            xmin = -Inf,xmax = Inf, ymin = -Inf,
+            xmin = -Inf, xmax = Inf, ymin = -Inf,
             ymax = Inf, alpha = 0.07) +
   geom_linerange(aes(ymin = cill,ymax = ciul), position = position_dodge(.9)) +
   ylim(0, 1) +
@@ -663,9 +666,9 @@ ggplot(all.data.f.props, aes(x = response.cat, y = prop,
 ```
 
 All effect sizes
-```{r}
+```{r all_es}
 # spread props and n_cond
-all.data.f.props.basic= all.data.f.props %>%
+all.data.f.props.basic = all.data.f.props %>%
                         filter(response.cat == "basic") %>%
                         select(-cill, -ciul, -response.cat, -prop, -n) %>%
                         spread(Answer.sample, n_cond, fill = F) %>%
@@ -678,7 +681,7 @@ all.data.f.props.basic = all.data.f.props  %>%
                         rename(teacher_prop = teacher, learner_prop = learner) %>%
                         left_join(all.data.f.props.basic)
 
-# get all effect sizes
+# get all effect sizes (compute.es package)
 all.es = propes(all.data.f.props.basic$learner_prop, 
            all.data.f.props.basic$teacher_prop, 
            all.data.f.props.basic$learner_n,
@@ -688,9 +691,8 @@ all.es = propes(all.data.f.props.basic$learner_prop,
 all.es$exp = all.data.f.props.basic$exp # add exp ids
 ```
 
-Estimate effect sizes
 ```{r}
-# fixed effects
+# fixed effects (metafor package)
 fixed.effects.d = rma(d, var.d, data = all.es, method = "FE")
 fixed.effects.d
 
@@ -701,24 +703,24 @@ random.effects.d
 
 ```{r, echo = F}
 #pdf("../writeup/figures/FIG_3.pdf", height = 5, width = 8)
-par(cex=1, font=1)
+par(cex = 1, font = 1)
 forest(random.effects.d, 
-       slab=all.es$exp,
+       slab = all.es$exp,
        mlab = "All", 
        xlab = "Cohen's d")
-par(font=2)
+par(font = 2)
 text(-3.6, 8.55, "Experiment")
 text(5.8, 8.55, "Cohen's d [95% CI]")
 
-addpoly(random.effects.d, row= -1, cex=.75, 
+addpoly(random.effects.d, row = -1, cex = .75, 
         annotate = F,  col = "red", mlab = "", efac = 2)
 #dev.off()
 ```
 
-<a name="power5"/>
+<a name = "power5"/>
 <h3> Power analysis for Exp. 5 </h3>
 <h4> (based on effect size estimated from Exps 1-4 and X&T-adult) </h4>
-```{r}
+```{r exp5_power}
 # fixed effects
 fixed.effects = rma(d, var.d, data = all.es[2:6,], method = "FE")
 power.analysis = pwr.chisq.test(w = fixed.effects$b, df = 1, 
