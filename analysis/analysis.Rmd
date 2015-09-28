@@ -99,7 +99,7 @@ There are different possible criteria  for categorizing a participant as a subor
 
 ```{r strict, echo = F}
 # Make global analytical decisions
-strict = TRUE
+strict = FALSE
 print(paste("Strict criteria: ", strict))
 ```
 
@@ -507,7 +507,8 @@ t3.f.props = get_bootstrapped_props(t3.f, "w.ans.cat", "Turk #3")
 ```{r, echo = F}
 ggplot(t3.f.props, aes(x = response.cat, y = prop, fill = Answer.sample)) +
   geom_bar(stat = "identity", position=position_dodge()) +
-  geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
+  geom_linerange(aes(ymin = cill, ymax = ciul), 
+                 position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
@@ -719,8 +720,33 @@ addpoly(random.effects.d, row = -1, cex = .75,
 
 <a name = "power5"/>
 <h3> Power analysis for Exp. 5 </h3>
-<h4> (based on effect size estimated from Exps 1-4 and X&T-adult) </h4>
+<h4> based on exp 4 </h4>
+
 ```{r exp5_power}
+## METHOD 1
+t3_tab
+chisq.test(t3_tab)$statistic
+sum(t3_tab)
+
+w1 =  sqrt(chisq.test(t3_tab)$statistic/sum(t3_tab))
+power.analysis = pwr.chisq.test(w1, df = 1, 
+                                sig.level = 0.05, power = .95)
+power.analysis
+print(paste("N for .95 power:", power.analysis$N))
+print(paste("Extra: ", .35 * power.analysis$N))
+
+
+## METHOD 2
+w2 =  sqrt(sum(((prop.table(t3_tab, 2)-.5)^2)/.5))
+power.analysis = pwr.chisq.test(w2, df = 1, 
+                                sig.level = 0.05, power = .95)
+power.analysis
+print(paste("N for .95 power:", power.analysis$N))
+print(paste("Extra: ", .35 * power.analysis$N))
+```
+
+```{r, eval = F}
+#OLD
 # fixed effects
 fixed.effects = rma(d, var.d, data = all.es[2:6,], method = "FE")
 power.analysis = pwr.chisq.test(w = fixed.effects$b, df = 1, 
