@@ -585,7 +585,8 @@ if (strict){
 t4.f$w.ans.cat <- "other"
 t4.f$w.ans.cat[sub] <- "sub"
 t4.f$w.ans.cat[basic] <- "basic"
-t4.f$w.ans.cat = factor(t4.f$w.ans.cat, levels = c("sub", "basic", "other"))
+t4.f$w.ans.cat = factor(t4.f$w.ans.cat, 
+                        levels = c("sub", "basic", "other"))
 
 # filter out "other"" responses
 length(which(t4.f$w.ans.cat == "other"))
@@ -600,7 +601,8 @@ t4.f.props = get_bootstrapped_props(t4.f, "w.ans.cat", "Turk #4")
 t4.f.props %>%
   ggplot(aes(x = response.cat, y = prop, fill = Answer.sample)) +
   geom_bar(stat = "identity", position = position_dodge()) +
-  geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
+  geom_linerange(aes(ymin = cill, ymax = ciul), 
+                 position = position_dodge(.9)) +
   ylim(0,1) +
   ylab("Prop. participants") +
   xlab("Generalization pattern") +
@@ -652,7 +654,8 @@ all.data.f.props$exp = factor(all.data.f.props$exp,
 ```
 
 ```{r, fig.width = 12, echo = F}
-all.data.f.props$response.cat  = revalue(all.data.f.props$response.cat, c("sub" = "sub."))
+all.data.f.props$response.cat  = revalue(all.data.f.props$response.cat,
+                                         c("sub" = "sub."))
 
 #pdf("../writeup/figures/FIG_2.pdf", height = 4, width = 12)
 all.data.f.props %>%
@@ -683,9 +686,11 @@ all.data.f.props.basic = all.data.f.props %>%
 
 all.data.f.props.basic = all.data.f.props  %>% 
                         filter(response.cat == "basic") %>%
-                        select(-cill, -ciul, -response.cat, -n_cond, -n) %>%
+                        select(-cill, -ciul, -response.cat,
+                               -n_cond, -n) %>%
                         spread(Answer.sample, prop, fill = F) %>%
-                        rename(teacher_prop = teacher, learner_prop = learner) %>%
+                        rename(teacher_prop = teacher,
+                               learner_prop = learner) %>%
                         left_join(all.data.f.props.basic)
 
 # get all effect sizes (compute.es package)
@@ -733,13 +738,12 @@ addpoly(random.effects.d, row = -1, cex = .75,
 #dev.off()
 ```
 
-
 <a name = "power5"/>
 <h3> Power analysis for Exp. 5 </h3>
-<h4> based on Exp 1-4 and X&T  </h4>
+<h4> ES based on X&T adults and Exp 1-4  </h4>
 
 ```{r exp5_power}
-all.es
+# Note: Here we use r to estimate effect size, which is formally equivalent to phi. Phi is formally equivalent to omega for 2 x 2 tables, which is the effect size estimator used in the pwr.chisq.test function. Elsewhere, we work with effect sizes using d. 
 
 # fixed effects
 fixed.effects = rma(r, var.r, data = all.es[2:6,], method = "FE")
@@ -748,7 +752,6 @@ power.analysis = pwr.chisq.test(w = fixed.effects$b, df = 1,
 power.analysis
 print(paste("N for .95 power (fixed effects):", power.analysis$N))
 print(paste("Extra: ", .35 * power.analysis$N))
-
 
 # random effects
 random.effects = rma(r, var.r, data = all.es[2:6,])
@@ -759,81 +762,4 @@ print(paste("N for .95 power (random effects):", power.analysis$N))
 print(paste("Extra: ", .35 * power.analysis$N))
 ```
 
-```{r, eval = F}
-## METHOD 1
-t3_tab
-chisq.test(t3_tab)$statistic
-sum(t3_tab)
-
-w1 =  sqrt(chisq.test(t3_tab, correct = F)$statistic/sum(t3_tab))
-w1
-
-## METHOD 2 - this only works in the univarate case
-# this is different from w1 above because it's bivariate
-w2 =  sqrt(sum(((prop.table(t3_tab, 2)-.5)^2)/.5))
-w2
-
-# but, if you just take the first row of t3 and normalize correctly, w1 = w2
-# w1
-top_row = t3_tab[,1]
-top_row
-sqrt(chisq.test(top_row)$statistic/sum(top_row))
-
-# w2
-sqrt(sum(((prop.table(top_row)-.5)^2)/.5))
-
-# According to Olivier and Bell (2013):
-# (1) cohen's w is called phi in the literature
-# (2) phi = pearson's r for the 2X2 case
-
-# so, try to use r from es estimates above (all.es)
-
-# BUT: 
-# r from compute.es package != w1 above. 
-all.es[all.es$exp == "Exp. 4", "r"]
-w1
-
-# w1 != r for adult xt data either...
-xt_a_tab = table(xt_data.adults$w.ans.cat, xt_data.adults$Answer.sample)
-sqrt(chisq.test(xt_a_tab)$statistic/sum(xt_a_tab))
-all.es[all.es$exp == "X&T adults", "r"]
-
-# But, if we calculate r directly from the equation in O&B r_ob = w1
-calculate_prop_r <- function(response, condition) {
-  tb = prop.table(table(response, condition))
-  p_11 = tb[4]
-  p_1m = tb[4] + tb[2]
-  p_m1 = tb[4] + tb[3]
-  num = p_11-(p_1m * p_m1)
-  denom = sqrt((p_1m * p_m1)*(1-p_1m)*(1-p_m1)) 
-  r = num/denom
-  return (r)
-}
-
-all.es = all.data.f %>%
-  group_by(exp) %>%
-  summarise(r_ob = calculate_prop_r(w.ans.cat, Answer.sample)) %>%
-  left_join(all.es)
-
-all.es[all.es$exp == "Exp. 4", "r_ob"]
-w1
-
-# Now we can almost use rma to use metanalytic methods to calculate effect size, but we don't know variances on r....
-
-# But, r and r_ob are almost perfectly correlated
-cor(all.es$r, all.es$r_ob)
-intercept = lm(all.es$r ~ all.es$r_ob)$coefficients[1]
-intercept
-all.es$r_ob + intercept
-all.es$r
-
-# what's the difference between how r and r_ob are calculated?
-# from compute.es package (r: or-> lor -> d -> r)
-# from ob (r_ob: p -> r)
-
-# covert r_ob to d, but this is not the same as compute.es d
-all.es$d_ob = 2*all.es$r_ob/sqrt(1-all.es$r_ob^2)
-
-# use rma variances?
-```
-
+Thus, by the most conservative estimate (criteria: strict = T; fixed effect), we need a N of 363 to achieve 95% power. With approximately 35% data loss, this means we need to run an extra 127 to achieve this power. This is approximately 500 participants. 
