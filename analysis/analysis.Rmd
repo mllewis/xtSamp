@@ -18,7 +18,8 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(8) Power Analysis for Exp. 5](#power5)** <br/>
 
 
-This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
+This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. Experiments conducted online can be viewed 
+ <a href="https://mllewis.github.io/projects/xtSamp/xtSampindex.html" target="_blank">here</a>.
 
 ***
 ***
@@ -160,11 +161,12 @@ xt_data.children$Answer.sample[(N_per_condition + 1):
                                (N_per_condition * 2)] = "learner"
 
 # get props
-xt.c.props = get_bootstrapped_props(xt_data.children, "response", "X&T (2007b) children")
+xt.c.props = get_bootstrapped_props(xt_data.children,
+                                    "response", "X&T (2007b) children")
 ```
 
 
-```{r, echo = F}
+```{r, echo = F, width = 13}
 xt = rbind(xt.c.props, xt.a.props)
 
 # re-order levels so consistent with other exps
@@ -661,17 +663,20 @@ all.data.f.props$response.cat  = revalue(all.data.f.props$response.cat,
 all.data.f.props %>%
   ggplot(aes(x = response.cat, y = prop, 
                              fill = Answer.sample)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_bar(stat = "identity", 
+           position = position_dodge()) +
   facet_grid(. ~ exp) +
-  geom_rect(data = all.data.f.props[21:28,], fill = "gray", 
+  geom_rect(data = all.data.f.props[21:28,],
+            fill = "gray", 
             xmin = -Inf, xmax = Inf, ymin = -Inf,
             ymax = Inf, alpha = 0.07) +
-  geom_linerange(aes(ymin = cill,ymax = ciul), position = position_dodge(.9)) +
+  geom_linerange(aes(ymin = cill, ymax = ciul), position = position_dodge(.9)) +
   ylim(0, 1) +
   ylab("Prop. Participants") +
   xlab("Generalization Pattern") +
   themeML + 
-  scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1") 
+  scale_fill_brewer(name = "Sampling\nCondition", 
+                    palette = "Set1") 
 #dev.off()
 ```
 
@@ -697,7 +702,7 @@ all.data.f.props.basic = all.data.f.props  %>%
 all.es = propes(all.data.f.props.basic$learner_prop, 
            all.data.f.props.basic$teacher_prop, 
            all.data.f.props.basic$learner_n,
-           all.data.f.props.basic$teacher_n, dig=3,
+           all.data.f.props.basic$teacher_n,
            verbose = F)
 
 all.es$exp = all.data.f.props.basic$exp # add exp ids
@@ -711,15 +716,6 @@ fixed.effects.d
 # random effects
 random.effects.d = rma(d, var.d, data = all.es)
 random.effects.d
-
-
-# fixed effects (metafor package)
-fixed.effects.r = rma(r, var.r, data = all.es, method = "FE")
-fixed.effects.r
-
-# random effects
-random.effects.r = rma(r, var.r, data = all.es)
-random.effects.r
 ```
 
 ```{r, echo = F}
@@ -747,18 +743,24 @@ addpoly(random.effects.d, row = -1, cex = .75,
 
 # fixed effects
 fixed.effects = rma(r, var.r, data = all.es[2:6,], method = "FE")
-power.analysis = pwr.chisq.test(w = fixed.effects$b, df = 1, 
-                                sig.level = 0.05, power = .95)
+power.analysis = pwr.chisq.test(w = fixed.effects$b,
+                                df = 1, 
+                                sig.level = 0.05,
+                                power = .95)
 power.analysis
-print(paste("N for .95 power (fixed effects):", power.analysis$N))
+print(paste("N for .95 power (fixed effects):",
+            power.analysis$N))
 print(paste("Extra: ", .35 * power.analysis$N))
 
 # random effects
 random.effects = rma(r, var.r, data = all.es[2:6,])
-power.analysis = pwr.chisq.test(w = random.effects$b, df = 1, 
-                                sig.level = 0.05, power = .95)
+power.analysis = pwr.chisq.test(w = random.effects$b, 
+                                df = 1, 
+                                sig.level = 0.05, 
+                                power = .95)
 power.analysis
-print(paste("N for .95 power (random effects):", power.analysis$N))
+print(paste("N for .95 power (random effects):",
+            power.analysis$N))
 print(paste("Extra: ", .35 * power.analysis$N))
 ```
 
