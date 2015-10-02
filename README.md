@@ -7,4 +7,4 @@ All experimental paradigms can be viewed directly here: [experiment library] (ht
 
 Experimental code can be accessed here: [experimental code] (https://github.com/mllewis/mllewis.github.io/tree/master/projects/xtSamp "experimental code").
 
-Rendered analyses can be found here: [analyses] (http://rpubs.com/mll/xtSamp).
+Rendered analyses can be found here: [analyses] (http://rpubs.com/mll/xtSampAnalysis).
