@@ -100,7 +100,7 @@ There are different possible criteria  for categorizing a participant as a subor
 
 ```{r strict, echo = F}
 # Make global analytical decisions
-strict = TRUE
+strict = FALSE
 print(paste("Strict criteria: ", strict))
 ```
 
