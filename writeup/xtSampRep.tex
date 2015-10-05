@@ -36,11 +36,11 @@ Keywords: word learning, induction, Bayesian inference}
 
 \section{Introduction}
 
-Imagine you're hiking up a trail and come to a junction. You see a large branch leaning on the trail, partially blocking one path. Most likely the branch is a bit of random debris that shouldn't affect your decision of which way to hike. But if you know that a friend walked up the trail in front of you just a few minutes before, you might interpret the branch as a signal, intended to point you in the right direction and help you follow her. The intuition underlying this example is that that an observation can have a very different meaning depending on its source.
+Imagine you're hiking up a trail and come to a junction. You see a large branch leaning on the trail, partially blocking one path. Most likely the branch is a bit of random debris that shouldn't affect your decision of which way to hike. But if you know that a friend walked up the trail in front of you just a few minutes before, you might interpret the branch as a signal, intended to point you in the right direction and help you follow her. The intuition underlying this example is that an observation can have a very different meaning depending on its source.
 
 \citeA{xu2007word,xu2007} (XT, below) examine this phenomenon---sensitivity to the sampling process for data---in the context of a particularly difficult inductive problem: concept generalization in word learning. Faced with a novel word and its referent, children must decide between an infinite number of hypotheses about the concept extension of that word. For example, consider a child who hears the word ``apple'' in the context of a single apple on a table. While the referent of that object is clear in the moment of language use (i.e., the particular apple on the table), the broader concept is highly ambiguous: ``apple'' could refer to the category of apples, the category of fruit, that particular kind of apples (e.g., granny smith), green things, or any number of other ad-hoc categories. As a possible solution to this problem, XT proposed a model of word learning as inductive concept learning. In their model, learners observe data as word-object pairs and make inferences about the concept associated with that word from a hypothesis space of all possible meanings. Critically, their model predicts that a learner should generalize more broadly when the exemplar for learning is sampled from the full hypothesis space of meanings ({\it weak sampling}), and should generalize more narrowly when the exemplar is sampled from only those true exemplars of the word ({\it strong sampling}). 
 
-In the study we focus on here, \citeA{xu2007} asked whether adults and children are sensitive to these differences in sampling process. In their experiment, they altered the strength of the sampling process by manipulating the source of the observed data. Learners in their study were presented with three labeled exemplars from a target category, either provided by a knowledgeable teacher or via the learners' own (presumably uninformed) guesses. Importantly, in both conditions, the data that the participants observed was the same: three exemplars from the same subordinate-level category. What differed between conditions was only the sampling process for these exemplars: Since the teacher knew the true concept, the data were presumed to be sampled strongly from the true concept. But in the learner-generated condition, the learner since was na\"ive about the true underlying concept and the data were thus sampled weakly from the full hypothesis space. 
+In the study we focus on here, \citeA{xu2007word} asked whether adults and children are sensitive to these differences in sampling process. In their experiment, they altered the strength of the sampling process by manipulating the source of the observed data. Learners in their study were presented with three labeled exemplars from a target category, either provided by a knowledgeable teacher or via the learners' own (presumably uninformed) guesses. Importantly, in both conditions, the data that the participants observed was the same: three exemplars from the same subordinate-level category. What differed between conditions was only the sampling process for these exemplars: Since the teacher knew the true concept, the data were presumed to be sampled strongly from the true concept. But in the learner-generated condition, the learner was na\"ive about the true underlying concept and the data were thus sampled weakly from the full hypothesis space. 
 
 Participants observed these samples in the context of a display of possible novel category members that showed hierarchical structure such that it could easily be clustered into subordinate, basic level, and superordinate categories. Participants were then tested on how broadly they generalized from the exemplars they observed. The key prediction was that participants in the teacher condition should be more likely to generalize tightly to the subordinate level, while participants in the learner condition should generalize more broadly at the basic level. The observed data supported this prediction in both adults ($N=14$, $d = 1.49\ [0.01,\ 2.97]$) and children ($N=24$, $d = 1.21\ [.19,\ 2.23]$).
 
@@ -56,6 +56,11 @@ In Experiment 1, we attempted to replicate XT's original design in an online par
 \subsection{Methods}
 \subsubsection{Participants} 
 XT's original sample with adults included 14 participants. We recruited 294 adult participants online through Amazon Mechanical Turk. Participants were paid US \$0.25. 
+
+We excluded participants from our analysis who responded ``yes'' to the basic non-match question (see Procedure below; $N=8$) or who did not select subordinate matches in the learning condition ($N = 21$) because this pattern of response indicated a misunderstanding of the task. No participant missed the attention check question. %Our final sample included 274 participants ($N_{learner} = 128$; $N_{teacher} = 146$).
+
+In addition, we found that not all participants responded consistently across questions of the same type within a trial,  unlike in the original report (for example, a participant might respond ``yes'' to one subordinate match and ``no'' to another). In all five of our experiments, we adopt two different criteria for categorizing participants' response pattern to deal with this variability: liberal and strict. Under our liberal criteria,  we categorized a participant as a basic-level generalizer if they responded ``yes'' to both the subordinate matches and {\it at least one} basic-level match. Under our strict critera, we categorized a participant as a basic-level generalizer if they responded ``yes'' to both the subordinate matches and {\it both} basic-level matches. Under both criteria, a participant was categorized as a subordinate-level generalizer if they responded ``yes'' to only the subordinate level matches. We excluded participants from our analysis who could not be categorized under either criterion. We report the results using the liberal criterion in the Main Text and describe the results using the strict criterion in Appendix A. In no case does the statistical significance of the results depend on the criterion we used. Under the liberal criteria, 79 participants could not be categorized as either basic or subordinate-level generalizers, and thus were excluded. With all exclusions, our final sample for Experiment 1 included 195 participants  ($N_{learner} = 101$; $N_{teacher} = 94$).
+
 \subsubsection{Stimuli}
 We created four sets of objects similar to the original stimuli (Figure \ref{fig:stims}, left).\footnote{All stimuli, experiments, raw data and analysis code can be found at \url{https://github.com/mllewis/xtSamp}. The analyses can be viewed directly here: \url{http://rpubs.com/mll/xtSampAnalysis}.} There were four basic level categories that included 15 unique objects each. Within each basic level category, there were three subordinate categories, with 5 unique objects each. The same novel words were used as the original experiment: ``wug,'' ``tupa,'' ``blicket,'' and ``fep.''
 \begin{figure}[t]
@@ -84,9 +89,9 @@ Participants then viewed a screen showing all the objects from two basic level c
 
 In the learner condition, the instructions were identical, except the last sentence was replaced with: ``The object circled below is a \textit{wug}. Click on two more \textit{wugs}.'' Participants were then asked to click on two more objects. After each click, a pop-up window appeared with the text ``You're correct! That's a wug.'' This text appeared regardless of the object the participant clicked on. The display then showed the object with a circle around it to indicate that it had been selected. Critically, in both the teacher and the learner conditions, the final display was identical: Thirty objects from two basic level categories, with three circled exemplars.
 
-Participants then advanced to the test phase. On the test screen, the objects from the training phase were shown at the top of the page in an identical format to the training phase, but without the exemplars circled. Below these objects was a horizontal line, and a generalization question (Figure \ref{fig:screen}). There were five generalization questions presented sequentially in the same order as in the original report (subordinate match, basic non-match, basic match, subordinate match, basic match). In each test question, one of the exemplars was shown with the following text above: ``Look at the object below. Is this a wug?'' Participants responded by marking ``yes'' or ``no'' using radio buttons.\footnote{After these questions, we asked several additional questions related to an additional manipulation irrelevant to the current work.} Finally, we asked an attention check question where participants had to selects the label they previously learned from four alternatives.
+Participants then advanced to the test phase. On the test screen, the objects from the training phase were shown at the top of the page in an identical format to the training phase, but without the exemplars circled. Below these objects was a horizontal line, and a generalization question (Figure \ref{fig:screen}). There were five generalization questions presented sequentially in the same order as in the original report (subordinate match, basic non-match, basic match, subordinate match, basic match). In each test question, the following text appeared, with one of the exemplars below: ``Look at the object below. Is this a wug?'' Participants responded by marking ``yes'' or ``no'' using radio buttons.\footnote{After these questions, we asked several questions related to an additional manipulation irrelevant to the current work.} Finally, we asked an attention check question where participants had to select the label they previously learned from four alternatives.
 
-Objects categories and word items were randomized across participants. The order of presentation of the individual objects on the screen was also randomized, as was the placement of the first circle. Sampling condition was manipulated between-participants. This and all subsequent online paradigms can be viewed directly here: \url{https://mllewis.github.io/projects/xtSamp/xtSampindex.html}.
+Object categories and word items were randomized across participants. The order of presentation of the individual objects on the screen was also randomized, as was the placement of the first circle. Sampling condition was manipulated between-participants. This and all subsequent online paradigms can be viewed directly here: \url{https://mllewis.github.io/projects/xtSamp/xtSampindex.html}.
 
 \subsection{Results and Discussion}
 
@@ -97,21 +102,22 @@ Objects categories and word items were randomized across participants. The order
  \end{center} 
 \end{figure}
 
-We excluded participants from our analysis who responded ``yes'' to the basic non-match question ($N=8$) or who did not select subordinate matches in the learning condition ($N = 21$), because this pattern of response indicated a misunderstanding of the task. No participant missed the attention check question. Our final sample included 274 participants ($N_{learner} = 128$; $N_{teacher} = 146$).
-
-Unlike in the original report, we found that not all participants responded consistently across questions of the same type within a trial (for example, a participant might respond ``yes'' to one subordinate match and ``no'' to another). In all five of our experiments, we adopt two different criteria for categorizing participants' response pattern to deal with this variability. Thus, we adopted a liberal criterion which categorized a participant as a basic-level generalizer if they responded ``yes'' to both the subordinate matches and {\it at least one} basic-level match. We also analyzed our data using a strict criterion, where a participant was categorized as a basic-level generalizer if they responded ``yes'' to both the subordinate matches and {\it both} basic-level matches. Under both criteria, a participant was categorized as a subordinate-level generalizer if they responded ``yes'' to only the subordinate level matches. We excluded participants from our analysis who could not be categorized under either criterion. We report the results using the liberal criterion in the Main Text and describe the results using the strict criterion in Appendix A. In no case does the statistical significance of the results depend on the criterion we used. Under the liberal criterion, 79 participants could not be categorized as either basic or subordinate-level generalizers, and thus were excluded. 
-
 While participants' generalizations were numerically more biased towards basic level generalization (as in XT's original study), the difference between sampling conditions was much smaller and was not statistically reliable ($\chi^2(1) = 0.63$, $p = .32$; Figure \ref{fig:bar_plots}). The effect size was also much smaller than the original finding ($d = 0.17\ [-0.17,\ 0.51]$; Figure \ref{fig:effect_sizes}).
 
 \section{Experiment 2}
 
 Given that Experiment 1 did not fully replicate XT's original effect, we attempted to alter our paradigm in Experiment 2 to more closely reflect the original in-person experiments. One critical difference between the in-person and online paradigms was the salience of the experimenter. In the in-person version, the teacher was an actual person interacting with the participant, while in Experiment 1, the reality of the teacher had to be inferred based only on first person text (``I will show you...''). Thus, one reason we might have observed a smaller effect in Experiment 1 is that participants might not have assumed strong sampling in the teacher condition. In Experiment 2, we tried to strengthen this manipulation by introducing a teacher character using a picture.
 
-We made also made several other changes to our design. Because many participants in Experiment 1 did not generalize at all (answered ``no'' to all generalization questions), we added questions that queried the original three exemplars that participants learned about. These ``proper name'' trials allowed us to more directly understand these participants' generalization strategy. We also reduced memory demands between the training and testing phases by circling the training exemplars in the testing phase, allowing participants to reflect back on their training data during test.
+We also made several other changes to our design. Because many participants in Experiment 1 did not generalize at all (answered ``no'' to all generalization questions), we added questions that queried the original three exemplars that participants learned about. These ``proper name'' trials allowed us to more directly understand these participants' generalization strategy. We also reduced memory demands between the training and testing phases by circling the training exemplars in the testing phase, allowing participants to reflect back on their training data during test.
 
 \subsection{Methods}
 
 \subsubsection{Participants} In Experiment 2, we recruited 150 participants from Amazon Mechanical Turk. Participants were paid US \$0.25 for their participation.
+
+As in Experiment 1, we excluded participants who responded ``yes'' to the basic non-match question ($N=15$) or who did not select subordinate matches in the learner condition ($N = 22$). We also excluded participants who missed any of the attention check questions ($N = 9$).
+
+The criteria for categorizing a participant's generalization strategy were identical to Experiment 1, except for the inclusion of the additional questions. To be categorized as either a subordinate or basic-level generalizer, a participant had to respond ``yes'' to all training items. To be categorized as a basic-level generalizer, a participant had to respond ``yes'' to one of the three basic-level questions under the liberal criteria, and ``yes'' to all three under the strict criteria. Twenty-eight participants were excluded because they could not be categorized as a subordinate or basic-level generalizer.  Our final sample included 90 participants ($N_{learner} = 53$; $N_{teacher} = 37$).
+
 
 \subsubsection{Stimuli}
 The object and word stimuli were identical to Experiment 1.
@@ -131,11 +137,7 @@ Finally, we added three additional check questions. We showed participants an ob
 
 \subsection{Results and Discussion}
 
-As in Experiment 1, we excluded participants who responded ``yes'' to the basic non-match question ($N=15$) or who did not select subordinate matches in the learner condition ($N = 22$). We also excluded participants who missed any of the attention check questions ($N = 9$). Our final sample included 118 participants ($N_{learner} = 43$; $N_{teacher} = 75$).
-
-The criteria for categorizing a participant's generalization strategy were identical to Experiment 1, except for the inclusion of the additional questions. To be categorized as either a subordinate or basic-level generalizer, a participant had to respond ``yes'' to all training items. To be categorized as a basic-level generalizer, a participant had to respond ``yes'' to one of the three basic-level questions under the liberal criteria, and ``yes'' to all three under the strict criteria. Twenty-eight participants were excluded because they could not be categorized as a subordinate or basic-level generalizer. 
-
-For the remaining participants, there was not a reliable effect of sampling on generalization ($\chi^2(1) = 0.89$, $p = .34$; $d = 0.33\ [-0.22,\ 0.88]$). Proportions and effect sizes are shown in Figures \ref{fig:bar_plots} and \ref{fig:effect_sizes}, respectively.
+There was not a reliable effect of sampling on generalization ($\chi^2(1) = 0.89$, $p = .34$; $d = 0.33\ [-0.22,\ 0.88]$). Proportions and effect sizes are shown in Figures \ref{fig:bar_plots} and \ref{fig:effect_sizes}, respectively.
 
 \section{Experiment 3}
 
@@ -147,6 +149,8 @@ Despite increasing the saliency of the teacher, we did not replicate the origina
 
 In Experiment 3, we recruited 41 undergraduate participants. Participants received either course credit or payment (US \$5.00) for their participation. 
 
+We excluded one participant who did not select subordinate-level matches in the training phase. We also excluded nine participants because they could not be categorized as a subordinate or basic-level generalizer. Our final sample included 31 participants ($N_{learner} = 13$; $N_{teacher} = 18$),
+
 \subsubsection{Stimuli}
 
 The object and word stimuli were identical to Experiments 1 and 2. 
@@ -157,7 +161,7 @@ The procedure in Experiment 3 closely followed the original. The experimenter pr
 
 \subsection{Results and Discussion}
 
-We excluded one participant who did not select subordinate-level matches in the training phase. We also excluded nine participants because they could not be categorized as a subordinate or basic-level generalizer. Of the remaining 31 participants ($N_{learner} = 13$; $N_{teacher} = 18$), there was not a reliable effect of sampling condition on generalization ($\chi^2(1) = 0.49$, $p = .48$; $d = 0.45\ [-0.38,\ 1.28]$). One notable difference in this experiment, however, was the rate of generalizations to the basic level: In Experiment 3, there were overall more basic level generalizations compared to the online versions. We return to this difference in the General Discussion.
+There was not a reliable effect of sampling condition on generalization ($\chi^2(1) = 0.49$, $p = .48$; $d = 0.45\ [-0.38,\ 1.28]$). One notable difference in this experiment, however, was the rate of generalizations to the basic level: In Experiment 3, there were overall more basic level generalizations compared to the online versions. We return to this difference in the General Discussion.
 
 \section{Experiment 4}
 
@@ -169,6 +173,8 @@ Given that the observed effect in Experiment 3 was only slightly larger than the
 
 We recruited 200 participants from Amazon Mechanical Turk. Participants were paid US \$0.30 for their participation.
 
+As in the previous experiments, we excluded participants who responded ``yes'' to the basic non-match question ($N=17$) or who did not select subordinate matches in the learning condition ($N = 27$). We also excluded participants who missed an attention check question ($N = 10$). An additional twenty-one participants were excluded from our analyses because they could not be categorized as a subordinate or basic-level generalizer.  Our final sample included 140 participants ($N_{learner} = 64$; $N_{teacher} = 76$). 
+
 \subsubsection{Stimuli}
 
 The objects contained less subordinate-level variability than that used in Experiment 1--3, and were highly similar to the original (Figure \ref{fig:stims}, right).
@@ -179,19 +185,20 @@ The procedure was identical to Experiment 2.
 
 \subsection{Results and Discussion}
 
-As in the previous experiments, we excluded participants who responded ``yes'' to the basic non-match question ($N=17$) or who did not select subordinate matches in the learning condition ($N = 27$). We also excluded participants who missed an attention check question ($N = 10$). Our final sample included 161 participants ($N_{learner} = 69$; $N_{teacher} = 92$). An additional twenty-one participants were excluded from our analyses because they could not be categorized as a subordinate or basic-level generalizer. 
 
-Of the remaining sample, there was a reliable effect of sampling on generalization: Participants in the teacher condition were more likely to generalize to the subordinate category, while participants in the learner condition were more likely to generalize to the basic-level ($\chi^2(1) = 6.42$, $p = .01$; $d = 0.59\ [.15,\ 1.03]$). This dataset thus replicates the pattern seen in the original XT report, though with a much smaller effect size.
+There was a reliable effect of sampling on generalization: Participants in the teacher condition were more likely to generalize to the subordinate category, while participants in the learner condition were more likely to generalize to the basic-level ($\chi^2(1) = 6.42$, $p = .01$; $d = 0.59\ [.15,\ 1.03]$). This dataset thus replicates the pattern seen in the original XT report, though with a much smaller effect size.
 
 \section{Experiment 5}
 
-In our final experiment, we repeated Experiment 4 with a pre-registered sample size based on the effect size estimated from Experiments 1--4 and the Xu and Tenenbaum adult experiment. 
+In our final experiment, we repeated Experiment 4 with a pre-registered sample size based on the effect size estimated from Experiments 1--4 and the XT adult experiment. 
 
 \subsection{Methods}
 
 \subsubsection{Participants}  
 
 To determine the sample size for Experiment 5, we conducted a power analysis based on the effect size estimated from our four replications attempts and the original adult experiment. Using this  effect size, a sample size of 355 was required to  achieve 95\% power on the chi-squared test. Given approximately 35\% data loss in the previous online experiments, we decided on a sample size of 500 participants. We pre-registered our sample size on Open Science Framework (\url{https://osf.io/5xg96/wiki/home/}). Due to an initial error in power calculations, the final sample was collected in two separate groups. As in Experiment 4, participants were recruited on Amazon Mechanical Turk and  paid US \$0.30 for their participation. 
+
+We used the same exclusion criteria as in Experiment 4. We excluded participants who responded ``yes'' to the basic non-match question ($N=40$) or who did not select subordinate matches in the learning condition ($N = 63$). We also excluded participants who missed an attention check question ($N = 21$). An additional sixty-one participants were excluded from our analyses because they could not be categorized as a subordinate or basic-level generalizer. Our final sample included 347 participants ($N_{learner} = 154$; $N_{teacher} = 193$). 
 
 \subsubsection{Stimuli}
 
@@ -203,9 +210,7 @@ The procedure was identical to Experiment 4.
 
 \subsection{Results and Discussion}
 
-We used the same exclusion criteria as in Experiment 4. We excluded participants who responded ``yes'' to the basic non-match question ($N=40$) or who did not select subordinate matches in the learning condition ($N = 63$). We also excluded participants who missed an attention check question ($N = 21$). Our final sample included 408 participants ($N_{learner} = 172$; $N_{teacher} = 236$). An additional sixty-one participants were excluded from our analyses because they could not be categorized as a subordinate or basic-level generalizer. 
-
-As in Experiment 4, the remaining sample showed a reliable effect of sampling on generalization: Participants in the teacher condition were more likely to generalize to the subordinate category, while participants in the learner condition were more likely to generalize to the basic-level ($\chi^2(1) = 24.49$, $p <.001$; $d = 0.71\ [.43,\ .99]$).
+As in Experiment 4, there was a reliable effect of sampling on generalization: Participants in the teacher condition were more likely to generalize to the subordinate category, while participants in the learner condition were more likely to generalize to the basic-level ($\chi^2(1) = 24.49$, $p <.001$; $d = 0.71\ [.43,\ .99]$).
 
 \section{Meta-analytic Synthesis}
 
@@ -217,7 +222,7 @@ As in Experiment 4, the remaining sample showed a reliable effect of sampling on
 
 To obtain the best estimate of the underlying effect size, we used meta-analytic methods to aggregate across estimates from each study. We defined a random effects model  based on the estimates from all seven studies \cite{Viechtbauer2010}. The random effect model treats each effect size estimate as an estimate of an underlying population effect size, and weights it by the precision of the estimate (sample size). 
 
-Across all seven studies, the estimated effect size was .53 ($[.28,\ .78]$; Fig. \ref{fig:effect_sizes}). This estimate was only slightly reduced when the original experiment with children was excluded  ($d = .50\ [.24,\ .75]$). Thus, we replicate the original effect of sampling on generalization ($d = 1.49\ [0.01,\ 2.97]$), but with an effect size approximately one-third as large as the original.
+Across all seven studies, the estimated effect size was .53 ($[.28,\ .78]$; Figure \ref{fig:effect_sizes}). This estimate was only slightly reduced when the original experiment with children was excluded  ($d = .50\ [.24,\ .75]$). Thus, we replicate the original effect of sampling on generalization ($d = 1.49\ [0.01,\ 2.97]$), but with an effect size approximately one-third as large as the original.
 
 \section{General Discussion}
 

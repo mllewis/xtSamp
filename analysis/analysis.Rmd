@@ -131,9 +131,13 @@ xt_data.adults = data.frame(response = c(as.character(teacher_xt_data),
 xt_data.adults$Answer.sample[1:N_per_condition] = "teacher"
 xt_data.adults$Answer.sample[(N_per_condition + 1):
                               (N_per_condition * 2)] = "learner"
+```
 
+Get props.
+```{r}
 # get props
-xt.a.props = get_bootstrapped_props(xt_data.adults, "response", "X&T (2007b) adults")
+xt.a.props = get_bootstrapped_props(xt_data.adults, "response",
+                                    "X&T (2007b) adults")
 ```
 
 X&T 2007b data - children
@@ -159,8 +163,10 @@ xt_data.children = data.frame(response = c(as.character(teacher_xt_data),
 xt_data.children$Answer.sample[1:N_per_condition] = "teacher"
 xt_data.children$Answer.sample[(N_per_condition + 1):
                                (N_per_condition * 2)] = "learner"
+```
 
-# get props
+Get props.
+```{r}
 xt.c.props = get_bootstrapped_props(xt_data.children,
                                     "response", "X&T (2007b) children")
 ```
@@ -222,7 +228,7 @@ t1.f = t1 %>%
 
 dim(t1)[1] # total
 dim(t1)[1] - t1.exclusion.ns[1,"n_noLabelParticipants"] - t1.exclusion.ns[1,"n_repeatWorkers"] # actual total
-dim(t1.f)[1] # total with exclusions
+dim(t1.f)[1] # total before other exclusions
 ```
 
 Categorize response patterns based on criterion.
@@ -247,8 +253,15 @@ length(which(t1.f$w.ans.cat == "other"))
 t1.f = t1.f[t1.f$w.ans.cat != "other",]
 t1.f$w.ans.cat = droplevels(t1.f$w.ans.cat)
 
-# get props
-t1.f.props = get_bootstrapped_props(t1.f, "w.ans.cat", "Turk #1")
+# final N:
+length(t1.f$Answer.sample)
+summary(t1.f$Answer.sample)
+```
+
+Get props.
+```{r}
+t1.f.props = get_bootstrapped_props(t1.f, "w.ans.cat",
+                                    "Turk #1")
 ```
 
 ```{r, echo = F}
@@ -265,7 +278,7 @@ t1.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats
+Stats.
 ```{r}
 t1_tab = table(t1.f$w.ans.cat, t1.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t1_tab)
@@ -307,7 +320,7 @@ t2.f = t2 %>%
                Answer.question3 == 'true' & Answer.question4 == 'true')  # take out those who missed attention check questions
 
 dim(t2)[1] # total
-dim(t2.f)[1] # total with exclusions
+dim(t2.f)[1] # total before "other" exlcusions
 ```
 
 Categorize response patterns based on criterion.
@@ -339,8 +352,15 @@ length(which(t2.f$w.ans.cat == "other"))
 t2.f = t2.f[t2.f$w.ans.cat != "other",]
 t2.f$w.ans.cat = droplevels(t2.f$w.ans.cat)
 
-# get props
-t2.f.props = get_bootstrapped_props(t2.f, "w.ans.cat", "Turk #2")
+# final N:
+length(t2.f$Answer.sample)
+summary(t2.f$Answer.sample)
+```
+
+Get props.
+```{r}
+t2.f.props = get_bootstrapped_props(t2.f, "w.ans.cat",
+                                    "Turk #2")
 ```
 
 ```{r, echo = F}
@@ -357,7 +377,7 @@ t2.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats 
+Stats.
 ```{r}
 t2_tab = table(t2.f$w.ans.cat, t2.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t2_tab)
@@ -386,7 +406,7 @@ l1.f = l1 %>%
        filter(t2_a == 1 & t3_a == 1 & t2_b == 1 & t2_b == 1)
 
 dim(l1)[1] # total
-dim(l1.f)[1] # total with exclusions
+dim(l1.f)[1] # total before "other" exclusions
 ```
 
 Categorize response patterns based on criterion.
@@ -418,8 +438,15 @@ length(which(l1.f$w.ans.cat  == "other"))
 l1.f = l1.f[l1.f$w.ans.cat != "other",]
 l1.f$w.ans.cat = droplevels(l1.f$w.ans.cat)
 
-# get props
-l1.f.props = get_bootstrapped_props(l1.f, "w.ans.cat", "In person")
+# final N:
+length(l1.f$Answer.sample)
+summary(l1.f$Answer.sample)
+```
+
+Get props.
+```{r}
+l1.f.props = get_bootstrapped_props(l1.f, "w.ans.cat",
+                                    "In person")
 ```
 
 ```{r, echo = F}
@@ -435,7 +462,7 @@ l1.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats
+Stats.
 ```{r}
 l1_tab = table(l1.f$w.ans.cat, l1.f$sample)[c("sub", "basic"),]
 chisq.test(l1_tab)
@@ -473,7 +500,7 @@ t3.f = t3 %>%
             Answer.question3 == 'TRUE' & Answer.question4 == 'TRUE') # take out those who missed filter question
 
 dim(t3)[1] # total
-dim(t3.f)[1] # total with exclusions
+dim(t3.f)[1] # total before "other" exclusions
 ```
 
 Categorize response patterns based on criterion.
@@ -505,8 +532,15 @@ length(which(t3.f$w.ans.cat == "other"))
 t3.f = t3.f[t3.f$w.ans.cat != "other",]
 t3.f$w.ans.cat = droplevels(t3.f$w.ans.cat)
 
-# get props
-t3.f.props = get_bootstrapped_props(t3.f, "w.ans.cat", "Turk #3")
+# final N:
+length(t3.f$Answer.sample)
+summary(t3.f$Answer.sample)
+```
+
+Get props.
+```{r}
+t3.f.props = get_bootstrapped_props(t3.f, "w.ans.cat", 
+                                    "Turk #3")
 ```
 
 ```{r, echo = F}
@@ -524,7 +558,7 @@ t3.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats
+Stats.
 ```{r}
 t3_tab = table(t3.f$w.ans.cat, t3.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t3_tab)
@@ -562,7 +596,7 @@ t4.f = t4 %>%
             Answer.question3 == 'TRUE' & Answer.question4 == 'TRUE')# take out those who missed filter question
 
 dim(t4)[1] # total
-dim(t4.f)[1] # total with exclusions
+dim(t4.f)[1] # total before "other" exclusions
 ```
 
 Categorize response patterns based on criterion.
@@ -595,8 +629,15 @@ length(which(t4.f$w.ans.cat == "other"))
 t4.f = t4.f[t4.f$w.ans.cat != "other",]
 t4.f$w.ans.cat = droplevels(t4.f$w.ans.cat)
 
-# get props
-t4.f.props = get_bootstrapped_props(t4.f, "w.ans.cat", "Turk #4")
+# final N:
+length(t4.f$Answer.sample)
+summary(t4.f$Answer.sample)
+```
+
+Get props.
+```{r}
+t4.f.props = get_bootstrapped_props(t4.f, "w.ans.cat",
+                                    "Turk #4")
 ```
 
 ```{r, echo = F}
@@ -614,7 +655,7 @@ t4.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats
+Stats.
 ```{r}
 t4_tab = table(t4.f$w.ans.cat, t4.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t4_tab)
@@ -763,5 +804,6 @@ print(paste("N for .95 power (random effects):",
             power.analysis$N))
 print(paste("Extra: ", .35 * power.analysis$N))
 ```
+
 
 Thus, by the most conservative estimate (criteria: strict = T; fixed effect), we need a N of 363 to achieve 95% power. With approximately 35% data loss, this means we need to run an extra 127 to achieve this power. This is approximately 500 participants. 
