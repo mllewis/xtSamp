@@ -1,7 +1,7 @@
 ---
 output: html_document
 ---
-<h2>  Xu and Tenenbaum 2007b Replication </h2>
+<h2> Xu and Tenenbaum 2007b Replication </h2>
 <h3> Supplementary Information </h3>
 
 ***
@@ -16,7 +16,7 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) Exp. 5 - online](#t4)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(7) All](#all)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(8) Power Analysis for Exp. 5](#power5)** <br/>
-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(9) Power Analysis for Exp. 6](#power6)** <br/>
 
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. Experiments conducted online can be viewed 
  <a href="https://mllewis.github.io/projects/xtSamp/xtSampindex.html" target="_blank">here</a>.
@@ -93,7 +93,7 @@ get_bootstrapped_props <- function(df, conditionName, expName){
   return(props)
 }
 
-opts_chunk$set(echo = T, message = F, warning = F, error = F, cache = F)
+opts_chunk$set(echo = T, message = T, warning = T, error = T, cache = F)
 ```
 
 There are different possible criteria  for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently across questions as either a subordinate or a basic generalizer for each of the two trials. In contrast, we observed varied responses across questions by participants in our sample. Thus, we adopt two criteria in analyzing our data: a "strict" criteria where we only include participants if they responded consistently ("yes" or "no" to all basic-level questions and "yes" or "no" to all subordinate level questions), and a "liberal" criteria where we counted a particpant as a basic generalizer if they responded "yes" to any of the basic level questions. The results of the liberal criteria are reported in the Main Text, and the results of the strict criteria are reported in Appendix A.
@@ -805,5 +805,166 @@ print(paste("N for .95 power (random effects):",
 print(paste("Extra: ", .35 * power.analysis$N))
 ```
 
-
 Thus, by the most conservative estimate (criteria: strict = T; fixed effect), we need a N of 363 to achieve 95% power. With approximately 35% data loss, this means we need to run an extra 127 to achieve this power. This is approximately 500 participants. 
+
+
+<a name = "power6"/>
+<h3> Power analysis for Exp. 6 </h3>
+<h4> ES based on Exp 1-5  </h4>
+
+```{r exp6_power,include = F}
+# fixed effects
+fixed.effects.turk.badStim = rma(r, var.r, data = all.es[3:4,],
+                                 method = "FE")$b # exp 1 and 2
+fixed.effects.lab.badStim = all.es[5,"r"] # exp 3
+fixed.effects.turk.goodStim = rma(r, c(.01, .01),
+                                  data = all.es[6:7,], method = "FE")$b # exp 4 and 5
+#fixed.effects.turk.badStim 
+#fixed.effects.lab.badStim
+#fixed.effects.turk.goodStim 
+stimEffect = fixed.effects.turk.goodStim - fixed.effects.turk.badStim
+personEffect = fixed.effects.lab.badStim - fixed.effects.turk.badStim 
+exp6_es = fixed.effects.turk.badStim + stimEffect + personEffect
+power.analysis = pwr.chisq.test(w = exp6_es,
+                                df = 1, 
+                                sig.level = 0.05,
+                                power = .95)
+power.analysis
+print(paste("N for .95 power (fixed effects):",
+            power.analysis$N))
+print(paste("Extra: ", .25 * power.analysis$N))
+
+# random effects
+random.effects.turk.badStim = rma(r, var.r, data = all.es[3:4,])$b
+random.effects.lab.badStim = all.es[5,"r"]
+random.effects.turk.goodStim = rma(r, c(.01, .01),
+                                  data = all.es[6:7,])$b
+
+stimEffect = random.effects.turk.goodStim - random.effects.turk.badStim
+personEffect = random.effects.lab.badStim - random.effects.turk.badStim 
+exp6_es = random.effects.turk.badStim + stimEffect + personEffect
+
+power.analysis = pwr.chisq.test(w = exp6_es,
+                                df = 1, 
+                                sig.level = 0.05,
+                                power = .95)
+power.analysis
+print(paste("N for .95 power (fixed effects):",
+            power.analysis$N))
+print(paste("Extra: ", .25 * power.analysis$N))
+#Using the most conservative estimate, we would need 74 participants. Assuming about 25% data loss as in Experiment 3, this would mean we would need to run 19 extra participants, for an approximate total of N = 100.
+```
+
+
+
+```{r, include = F}
+# all
+all.es.fixed <- all.es
+all.es.fixed[7, "var.r"] = .01
+all.es.estimate = rma(r, var.r, data = all.es.fixed,
+                                 method = "FE")$b
+power.analysis = pwr.chisq.test(w = all.es.estimate,
+                                df = 1, 
+                                sig.level = 0.05,
+                                power = .95)
+power.analysis
+print(paste("N for .95 power (fixed effects):",
+            power.analysis$N))
+print(paste("Extra: ", .25 * power.analysis$N))
+
+```
+
+
+```{r}
+# estimate effect size of E6
+fixed.effects.turk.goodStim = rma(r, c(.01, .01),
+                                  data = all.es[6:7,], method = "FE")$b # exp 4 and 5
+fixed.effects.lab.badStim = all.es[5,"r"]
+personEffect = fixed.effects.lab.badStim - fixed.effects.turk.badStim 
+exp6_es = fixed.effects.lab.badStim + personEffect
+
+# convert es E6 to proportions (I got these from just messing around with propes function using exp6_es) and get in tabular form
+learner_prop_basic = .28
+teacher_prop_basic = .1
+learner_prop_sub = 1 - learner_prop_basic 
+teacher_prop_sub = 1 - teacher_prop_basic
+
+ex6 = matrix(c(teacher_prop_sub, learner_prop_sub,
+                teacher_prop_basic, learner_prop_basic), ncol = 2, byrow = T)
+colnames(ex6)<-c("teacher", "learner")
+rownames(ex6)<-c("sub", "basic")
+ex6 = ex6 * 100
+
+# get E4 and E5 data in tabular form
+d.goodStim.turk = rbind(t3.f, t4.f)[,c("w.ans.cat", "Answer.sample")]
+e4_and_5 = table(d.goodStim.turk)
+```
+
+```{r}
+sampleTable <- function(Full, n) {
+    Frame <- expand.grid(lapply(dim(Full), seq))
+    m = table(Frame[sample(1:nrow(Frame), n, prob = Full, replace = TRUE), ])
+
+    # check dimensions
+    dim_check = (dim(m) == c(2,2))
+    if (all(dim_check)){
+        colnames(m)<- colnames(e4_and_5)
+        rownames(m)<- rownames(e4_and_5)
+    } else if (all(dim_check == FALSE)) {
+        missing = setdiff(c("1", "2"), rownames(m))
+        shared = intersect(c("1", "2"), rownames(m))
+        m = rbind(m, c(0))
+        rownames(m)[2] = rownames(e4_and_5)[as.numeric(missing)]
+        rownames(m)[1] = rownames(e4_and_5)[as.numeric(shared)]
+        missing = setdiff(c("1", "2"), colnames(m))
+        shared = intersect(c("1", "2"), colnames(m))
+        m = cbind(m, c(0, 0))
+        colnames(m)[2] = colnames(e4_and_5)[as.numeric(missing)]
+        colnames(m)[1] = colnames(e4_and_5)[as.numeric(shared)]
+    } else {
+       if (!(dim_check)[1]){
+        missing = setdiff(c("1", "2"), rownames(m))
+        shared = intersect(c("1", "2"), rownames(m))
+        m = rbind(m, c(0, 0))
+        rownames(m)[2] = rownames(e4_and_5)[as.numeric(missing)]
+        rownames(m)[1] = rownames(e4_and_5)[as.numeric(shared)]
+        colnames(m) = colnames(e4_and_5)
+      }
+      if (!(dim_check)[2]){
+        missing = setdiff(c("1", "2"), colnames(m))
+        shared = intersect(c("1", "2"), colnames(m))
+        m = cbind(m, c(0, 0))
+        colnames(m)[2] = colnames(e4_and_5)[as.numeric(missing)]
+        colnames(m)[1] = colnames(e4_and_5)[as.numeric(shared)]
+        rownames(m) = rownames(e4_and_5)
+      }
+    }
+  
+    m <- m[rownames(e4_and_5),colnames(e4_and_5)]
+    m
+}
+
+prop_sig_ps = numeric(0)
+for (n in 5:500){
+  #print(n)
+  ps = numeric(0)
+  for (j in 1:50){
+      # get ex6 sampled data
+      sampled_ex6 = sampleTable(ex6, n)
+      
+      # merge into single matrix for CMH test
+      both_ex_tables = list(e4_and_5, sampled_ex6)
+      d = do.call(cbind, both_ex_tables)
+      dim = c(dim(both_ex_tables[[1]]), length(both_ex_tables))
+      tab.for.power = array(d, dim)
+      
+      # p-value from Cochran–Mantel–Haenszel test
+      ps[j] = mantelhaen.test(tab.for.power)$p.value
+      #ps[j] = woolf_test(tab.for.power)$p.value
+  }
+  prop_sig_ps[n] = length(which(ps < .05))/length(ps)
+}
+
+qplot(1:n, prop_sig_ps, xlab = "n")
+
+```
