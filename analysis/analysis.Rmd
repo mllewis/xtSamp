@@ -16,7 +16,7 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) Exp. 5 - online](#t4)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(7) All](#all)** <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(8) Power Analysis for Exp. 5](#power5)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(9) Power Analysis for Exp. 6](#power6)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(9) Analyses for possible moderators](#mods)** <br/>
 
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. Experiments conducted online can be viewed 
  <a href="https://mllewis.github.io/projects/xtSamp/xtSampindex.html" target="_blank">here</a>.
@@ -171,7 +171,6 @@ xt.c.props = get_bootstrapped_props(xt_data.children,
                                     "response", "X&T (2007b) children")
 ```
 
-
 ```{r, echo = F, width = 13}
 xt = rbind(xt.c.props, xt.a.props)
 
@@ -189,6 +188,15 @@ ggplot(xt, aes(x = response.cat, y = prop, fill = Answer.sample)) +
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1") +
   ggtitle("Original Xu and Tenenbaum Data") +
   themeML  
+```
+
+Stats.
+```{r}
+xta_tab = table(xt_data.adults$Answer.sample, xt_data.adults$response)
+chisq.test(xta_tab)
+
+xtc_tab = table(xt_data.children$Answer.sample, xt_data.children$response)
+chisq.test(xtc_tab)
 ```
 
 <a name = "t1"/>
@@ -807,164 +815,97 @@ print(paste("Extra: ", .35 * power.analysis$N))
 
 Thus, by the most conservative estimate (criteria: strict = T; fixed effect), we need a N of 363 to achieve 95% power. With approximately 35% data loss, this means we need to run an extra 127 to achieve this power. This is approximately 500 participants. 
 
+<a name = "mods"/>
+<h3> Analyses of possible moderators</h3>
 
-<a name = "power6"/>
-<h3> Power analysis for Exp. 6 </h3>
-<h4> ES based on Exp 1-5  </h4>
+One possible reason for the difference between our observed effect sizes and the original is the presence of moderators. There are two notable differences between our experiments and the original: the online nature of several of our experiments, and the different stimuli used in Experiments 1-3. Here we test whether these moderators are reliable. 
 
-```{r exp6_power,include = F}
-# fixed effects
-fixed.effects.turk.badStim = rma(r, var.r, data = all.es[3:4,],
-                                 method = "FE")$b # exp 1 and 2
-fixed.effects.lab.badStim = all.es[5,"r"] # exp 3
-fixed.effects.turk.goodStim = rma(r, c(.01, .01),
-                                  data = all.es[6:7,], method = "FE")$b # exp 4 and 5
-#fixed.effects.turk.badStim 
-#fixed.effects.lab.badStim
-#fixed.effects.turk.goodStim 
-stimEffect = fixed.effects.turk.goodStim - fixed.effects.turk.badStim
-personEffect = fixed.effects.lab.badStim - fixed.effects.turk.badStim 
-exp6_es = fixed.effects.turk.badStim + stimEffect + personEffect
-power.analysis = pwr.chisq.test(w = exp6_es,
-                                df = 1, 
-                                sig.level = 0.05,
-                                power = .95)
-power.analysis
-print(paste("N for .95 power (fixed effects):",
-            power.analysis$N))
-print(paste("Extra: ", .25 * power.analysis$N))
+Person Effect
+```{r person_effect}
 
-# random effects
-random.effects.turk.badStim = rma(r, var.r, data = all.es[3:4,])$b
-random.effects.lab.badStim = all.es[5,"r"]
-random.effects.turk.goodStim = rma(r, c(.01, .01),
-                                  data = all.es[6:7,])$b
-
-stimEffect = random.effects.turk.goodStim - random.effects.turk.badStim
-personEffect = random.effects.lab.badStim - random.effects.turk.badStim 
-exp6_es = random.effects.turk.badStim + stimEffect + personEffect
-
-power.analysis = pwr.chisq.test(w = exp6_es,
-                                df = 1, 
-                                sig.level = 0.05,
-                                power = .95)
-power.analysis
-print(paste("N for .95 power (fixed effects):",
-            power.analysis$N))
-print(paste("Extra: ", .25 * power.analysis$N))
-#Using the most conservative estimate, we would need 74 participants. Assuming about 25% data loss as in Experiment 3, this would mean we would need to run 19 extra participants, for an approximate total of N = 100.
-```
-
-
-
-```{r, include = F}
-# all
-all.es.fixed <- all.es
-all.es.fixed[7, "var.r"] = .01
-all.es.estimate = rma(r, var.r, data = all.es.fixed,
-                                 method = "FE")$b
-power.analysis = pwr.chisq.test(w = all.es.estimate,
-                                df = 1, 
-                                sig.level = 0.05,
-                                power = .95)
-power.analysis
-print(paste("N for .95 power (fixed effects):",
-            power.analysis$N))
-print(paste("Extra: ", .25 * power.analysis$N))
-
-```
-
-
-```{r}
-# estimate effect size of E6
-fixed.effects.turk.goodStim = rma(r, c(.01, .01),
-                                  data = all.es[6:7,], method = "FE")$b # exp 4 and 5
-fixed.effects.lab.badStim = all.es[5,"r"]
-personEffect = fixed.effects.lab.badStim - fixed.effects.turk.badStim 
-exp6_es = fixed.effects.lab.badStim + personEffect
-
-# convert es E6 to proportions (I got these from just messing around with propes function using exp6_es) and get in tabular form
-learner_prop_basic = .28
-teacher_prop_basic = .1
-learner_prop_sub = 1 - learner_prop_basic 
-teacher_prop_sub = 1 - teacher_prop_basic
-
-ex6 = matrix(c(teacher_prop_sub, learner_prop_sub,
-                teacher_prop_basic, learner_prop_basic), ncol = 2, byrow = T)
-colnames(ex6)<-c("teacher", "learner")
-rownames(ex6)<-c("sub", "basic")
-ex6 = ex6 * 100
-
-# get E4 and E5 data in tabular form
-d.goodStim.turk = rbind(t3.f, t4.f)[,c("w.ans.cat", "Answer.sample")]
-e4_and_5 = table(d.goodStim.turk)
-```
-
-```{r}
-sampleTable <- function(Full, n) {
-    Frame <- expand.grid(lapply(dim(Full), seq))
-    m = table(Frame[sample(1:nrow(Frame), n, prob = Full, replace = TRUE), ])
-
-    # check dimensions
-    dim_check = (dim(m) == c(2,2))
-    if (all(dim_check)){
-        colnames(m)<- colnames(e4_and_5)
-        rownames(m)<- rownames(e4_and_5)
-    } else if (all(dim_check == FALSE)) {
-        missing = setdiff(c("1", "2"), rownames(m))
-        shared = intersect(c("1", "2"), rownames(m))
-        m = rbind(m, c(0))
-        rownames(m)[2] = rownames(e4_and_5)[as.numeric(missing)]
-        rownames(m)[1] = rownames(e4_and_5)[as.numeric(shared)]
-        missing = setdiff(c("1", "2"), colnames(m))
-        shared = intersect(c("1", "2"), colnames(m))
-        m = cbind(m, c(0, 0))
-        colnames(m)[2] = colnames(e4_and_5)[as.numeric(missing)]
-        colnames(m)[1] = colnames(e4_and_5)[as.numeric(shared)]
-    } else {
-       if (!(dim_check)[1]){
-        missing = setdiff(c("1", "2"), rownames(m))
-        shared = intersect(c("1", "2"), rownames(m))
-        m = rbind(m, c(0, 0))
-        rownames(m)[2] = rownames(e4_and_5)[as.numeric(missing)]
-        rownames(m)[1] = rownames(e4_and_5)[as.numeric(shared)]
-        colnames(m) = colnames(e4_and_5)
-      }
-      if (!(dim_check)[2]){
-        missing = setdiff(c("1", "2"), colnames(m))
-        shared = intersect(c("1", "2"), colnames(m))
-        m = cbind(m, c(0, 0))
-        colnames(m)[2] = colnames(e4_and_5)[as.numeric(missing)]
-        colnames(m)[1] = colnames(e4_and_5)[as.numeric(shared)]
-        rownames(m) = rownames(e4_and_5)
-      }
-    }
+# Welch's t-test
+# s = variance
+welch_t_test <- function(d1, d2, s1, s2, n1, n2){
+  t = (d1 - d2)/sqrt((s1/n1) + (s2/n2))
+  df = ((s1/n1) + (s2/n2))^2 / (((s1/n1)^2/(n1-1)) + ((s2/n2)^2/(n2-1)))
+  p = 2*(1-pt(abs(t),df))
+  results = c(t, df, p)
+  names(results) = c("t", "df", "p")
   
-    m <- m[rownames(e4_and_5),colnames(e4_and_5)]
-    m
+  results
 }
 
-prop_sig_ps = numeric(0)
-for (n in 5:500){
-  #print(n)
-  ps = numeric(0)
-  for (j in 1:50){
-      # get ex6 sampled data
-      sampled_ex6 = sampleTable(ex6, n)
-      
-      # merge into single matrix for CMH test
-      both_ex_tables = list(e4_and_5, sampled_ex6)
-      d = do.call(cbind, both_ex_tables)
-      dim = c(dim(both_ex_tables[[1]]), length(both_ex_tables))
-      tab.for.power = array(d, dim)
-      
-      # p-value from Cochran–Mantel–Haenszel test
-      ps[j] = mantelhaen.test(tab.for.power)$p.value
-      #ps[j] = woolf_test(tab.for.power)$p.value
-  }
-  prop_sig_ps[n] = length(which(ps < .05))/length(ps)
-}
+mod = predict(rma(d, var.d, data = all.es[3:4,], method = "FE"))
+d1 = mod$pred  
+n1 = (all.es[all.es$exp == "Exp. 1", "N.total"] +
+        all.es[all.es$exp == "Exp. 2", "N.total"])/2
+s1 = mod$se^2
+d2 = all.es[all.es$exp == "Exp. 3", "d"]  
+n2 = all.es[all.es$exp == "Exp. 3", "N.total"]  
+s2 = all.es[all.es$exp == "Exp. 3", "var.d"]
 
-qplot(1:n, prop_sig_ps, xlab = "n")
+welch_t_test(d1, d2, s1, s2, n1, n2)
+```
 
+```{r person_effect_power}
+# min person effect 
+min_person_effect = all.es[all.es$exp == "Exp. 3", "d"] - 
+  all.es[all.es$exp == "Exp. 2", "d"] 
+
+# max person effect
+max_person_effect = all.es[all.es$exp == "Exp. 3", "d"] - 
+  all.es[all.es$exp == "Exp. 1", "d"] 
+
+N_4_and_5 = all.es[all.es$exp == "Exp. 4", "N.total"] + 
+  all.es[all.es$exp == "Exp. 5", "N.total"] 
+
+pwr.t2n.test(d = min_person_effect, n1 = N_4_and_5, power = .8)
+pwr.t2n.test(d = max_person_effect, n1 = N_4_and_5, power = .8)
+```
+
+Stimuli Effect
+```{r stim_effect}
+mod = predict(rma(d, var.d, data = all.es[3:4,], method = "FE"))
+d1 = mod$pred  
+n1 = (all.es[all.es$exp == "Exp. 1", "N.total"] +
+        all.es[all.es$exp == "Exp. 2", "N.total"])/2
+s1 = mod$se^2
+mod2 = predict(rma(d, var.d, data = all.es[6:7,], method = "FE"))
+d2 = mod2$pred  
+n2 = (all.es[all.es$exp == "Exp. 4", "N.total"] +
+        all.es[all.es$exp == "Exp. 5", "N.total"])/2
+s2 = mod2$se^2
+
+welch_t_test(d1, d2, s1, s2, n1, n2)
+```
+
+Testing moderators using logistic regression
+Person effect
+```{r}
+all.data.f$exp2 = as.factor(ifelse(all.data.f$exp == "Exp. 1"|
+                           all.data.f$exp == "Exp. 2", "web.badStim", 
+                         ifelse( all.data.f$exp == "Exp. 3", "lab.badStim", 
+                                 ifelse(all.data.f$exp == "Exp. 4"|
+                           all.data.f$exp == "Exp. 5", "web.goodStim", all.data.f$exp))))
+
+person.effect.model = glm(w.ans.cat ~ Answer.sample + exp2, 
+    data = all.data.f[all.data.f$exp2 == "web.badStim" |
+                        all.data.f$exp2 == "lab.badStim", ], 
+    family = "binomial")
+summary(person.effect.model)
+```
+
+Stim effect
+```{r}
+all.data.f$exp2 = as.factor(ifelse(all.data.f$exp == "Exp. 1"|
+                           all.data.f$exp == "Exp. 2", "web.badStim", 
+                         ifelse( all.data.f$exp == "Exp. 3", "lab.badStim", 
+                                 ifelse(all.data.f$exp == "Exp. 4"|
+                           all.data.f$exp == "Exp. 5", "web.goodStim", all.data.f$exp))))
+
+stim.effect.model = glm(w.ans.cat ~ Answer.sample + exp2, 
+    data = all.data.f[all.data.f$exp2 == "web.badStim" |
+                        all.data.f$exp2 == "web.goodStim", ], 
+    family = "binomial")
+summary(stim.effect.model)
 ```
