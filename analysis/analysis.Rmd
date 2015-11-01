@@ -38,6 +38,8 @@ library(metafor)
 library(compute.es)
 library(langcog)
 library(tidyr)
+library(broom)
+library(reshape2)
 
 # set graphical parameters
 fs = 18
@@ -892,7 +894,14 @@ person.effect.model = glm(w.ans.cat ~ Answer.sample + exp2,
     data = all.data.f[all.data.f$exp2 == "web.badStim" |
                         all.data.f$exp2 == "lab.badStim", ], 
     family = "binomial")
-summary(person.effect.model)
+tidy(person.effect.model)
+
+
+person.effect.model = glm(w.ans.cat ~ Answer.sample * exp2, 
+    data = all.data.f[all.data.f$exp2 == "web.badStim" |
+                        all.data.f$exp2 == "lab.badStim", ], 
+    family = "binomial")
+tidy(person.effect.model)
 ```
 
 Stim effect
@@ -907,5 +916,252 @@ stim.effect.model = glm(w.ans.cat ~ Answer.sample + exp2,
     data = all.data.f[all.data.f$exp2 == "web.badStim" |
                         all.data.f$exp2 == "web.goodStim", ], 
     family = "binomial")
-summary(stim.effect.model)
+tidy(stim.effect.model)
+
+all.data.f$exp2 = as.factor(ifelse(all.data.f$exp == "Exp. 1"|
+                           all.data.f$exp == "Exp. 2", "web.badStim", 
+                         ifelse( all.data.f$exp == "Exp. 3", "lab.badStim", 
+                                 ifelse(all.data.f$exp == "Exp. 4"|
+                           all.data.f$exp == "Exp. 5", "web.goodStim", all.data.f$exp))))
+
+stim.effect.model = glm(w.ans.cat ~ Answer.sample * exp2, 
+    data = all.data.f[all.data.f$exp2 == "web.badStim" |
+                        all.data.f$exp2 == "web.goodStim", ], 
+    family = "binomial")
+tidy(stim.effect.model)
 ```
+
+glm power analysis
+```{r exp6_power}
+# estimate effect size of E6
+fixed.effects.turk.goodStim = rma(r, c(.01, .01),
+                                  data = all.es[6:7,], method = "FE")$b # exp 4 and 5
+fixed.effects.turk.badStim = rma(r, var.r,
+                                  data = all.es[3:4,], method = "FE")$b # exp 1 and 2
+fixed.effects.lab.badStim = all.es[5,"r"]
+personEffect = fixed.effects.lab.badStim - fixed.effects.turk.badStim 
+exp6_es = (fixed.effects.lab.badStim + personEffect)[1]
+
+# convert es E6 to proportions and then make each observation a row
+# Note: I got props from just messing around with propes function using exp6_es
+learner_prop_basic = .28
+teacher_prop_basic = .1
+learner_prop_sub = 1 - learner_prop_basic 
+teacher_prop_sub = 1 - teacher_prop_basic
+
+d.goodStim.lab.estimated = data.frame(matrix(ncol = 0, nrow = 200))
+d.goodStim.lab.estimated$Answer.sample = rep("teacher",100)
+d.goodStim.lab.estimated$Answer.sample[101:200] = rep("learner",100)
+d.goodStim.lab.estimated$w.ans.cat = "sub"
+d.goodStim.lab.estimated$w.ans.cat[1:(teacher_prop_basic*100)] = "basic"
+d.goodStim.lab.estimated$w.ans.cat[101:(100+(learner_prop_basic*100))] = "basic"
+d.goodStim.lab.estimated$exp = "exp6"
+
+# E4 and E5 data with each observation a row
+d.goodStim.turk = rbind(t3.f, t4.f)[,c("w.ans.cat", "Answer.sample")]
+d.goodStim.turk$exp = "exp4and5"
+
+# run power simulation
+prop_sig_ps = numeric(0)
+for (n in seq(5,1000,5)){
+  #print(n)
+  ps = numeric(0)
+  
+  for (s in 1:100){
+    
+      # get ex6 sampled data
+      ex6.estimated = sample_n(d.goodStim.lab.estimated, n, replace = T)
+      
+      # bind two data sets together, distinguished by exp value
+      d_both = rbind(ex6.estimated, d.goodStim.turk)
+      d_both = colwise(as.factor)(d_both)
+
+      # run model and get p value
+      m = tidy(glm(w.ans.cat ~ Answer.sample * exp, d_both, family = "binomial"))
+      if (dim(m)[1] > 3) {
+         ps[s] = m[m$term == "Answer.sampleteacher:expexp6", "p.value"] 
+      } else {
+         ps[s] = "NA"
+      }
+  }
+  prop_sig_ps[n] = length(which(ps < .05))/length(ps)
+}
+
+qplot(1:n, prop_sig_ps, xlab = "n")
+
+# just plot proportions
+exp4_5props = prop.table(table(d_both)[,,1],1) %>%
+            melt() %>%
+            mutate(exp = "Exp. 4 and 5")
+
+
+both_props = prop.table(table(d_both)[,,2],1) %>%
+            melt() %>%
+            mutate(exp = "Exp. 6 estimated") %>%
+            rbind(exp4_5props)
+
+both_props %>%
+  ggplot(aes(x = w.ans.cat, y = value, 
+                             fill = Answer.sample)) +
+  geom_bar(stat = "identity", 
+           position = position_dodge()) +
+  facet_grid(. ~ exp) +
+  ylim(0, 1) +
+  ylab("Prop. Participants") +
+  xlab("Generalization Pattern") +
+  themeML + 
+  scale_fill_brewer(name = "Sampling\nCondition", 
+                    palette = "Set1") 
+
+# flip learner and teacher to debug
+exp4and5.flipped = d_both %>%
+                  filter(exp == "exp4and5")%>%
+                  mutate(Answer.sample, 
+                         Answer.sample = revalue(Answer.sample, 
+                                                   c("learner" = "teacher",
+                                                     "teacher"= "learner")))
+
+d_both2 = rbind(ex6.estimated, exp4and5.flipped)
+exp4_5props = prop.table(table(d_both2)[,,1],1) %>%
+            melt() %>%
+            mutate(exp = "Exp. 4 and 5")
+
+both_props = prop.table(table(d_both2)[,,2],1) %>%
+            melt() %>%
+            mutate(exp = "Exp. 6 estimated") %>%
+            rbind(exp4_5props)
+
+both_props %>%
+  ggplot(aes(x = w.ans.cat, y = value, 
+                             fill = Answer.sample)) +
+  geom_bar(stat = "identity", 
+           position = position_dodge()) +
+  facet_grid(. ~ exp) +
+  ylim(0, 1) +
+  ylab("Prop. Participants") +
+  xlab("Generalization Pattern") +
+  themeML + 
+  scale_fill_brewer(name = "Sampling\nCondition", 
+                    palette = "Set1") 
+
+d_both2 = colwise(as.factor)(d_both2)
+tidy(glm(w.ans.cat ~ Answer.sample * exp, d_both2, family = "binomial"))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, include = F, eval = F}
+      #d_both <- colwise(as.factor)(d_both)
+
+sampleTable <- function(Full, n) {
+    Frame <- expand.grid(lapply(dim(Full), seq))
+    m = table(Frame[sample(1:nrow(Frame), n, prob = Full, replace = TRUE), ])
+
+    # check dimensions
+    dim_check = (dim(m) == c(2,2))
+    if (all(dim_check)){
+        colnames(m) <- colnames(e4_and_5)
+        rownames(m) <- rownames(e4_and_5)
+    } else if (all(dim_check == FALSE)) {
+        missing = setdiff(c("1", "2"), rownames(m))
+        shared = intersect(c("1", "2"), rownames(m))
+        m = rbind(m, c(0))
+        rownames(m)[2] = rownames(e4_and_5)[as.numeric(missing)]
+        rownames(m)[1] = rownames(e4_and_5)[as.numeric(shared)]
+        missing = setdiff(c("1", "2"), colnames(m))
+        shared = intersect(c("1", "2"), colnames(m))
+        m = cbind(m, c(0, 0))
+        colnames(m)[2] = colnames(e4_and_5)[as.numeric(missing)]
+        colnames(m)[1] = colnames(e4_and_5)[as.numeric(shared)]
+    } else {
+       if (!(dim_check)[1]){
+        missing = setdiff(c("1", "2"), rownames(m))
+        shared = intersect(c("1", "2"), rownames(m))
+        m = rbind(m, c(0, 0))
+        rownames(m)[2] = rownames(e4_and_5)[as.numeric(missing)]
+        rownames(m)[1] = rownames(e4_and_5)[as.numeric(shared)]
+        colnames(m) = colnames(e4_and_5)
+      }
+      if (!(dim_check)[2]){
+        missing = setdiff(c("1", "2"), colnames(m))
+        shared = intersect(c("1", "2"), colnames(m))
+        m = cbind(m, c(0, 0))
+        colnames(m)[2] = colnames(e4_and_5)[as.numeric(missing)]
+        colnames(m)[1] = colnames(e4_and_5)[as.numeric(shared)]
+        rownames(m) = rownames(e4_and_5)
+      }
+    }
+    
+    m <- m[rownames(e4_and_5),colnames(e4_and_5)]
+    m
+}
+
+
+# run power simulation
+prop_sig_ps = numeric(0)
+for (n in seq(1000,10000,1000)){
+  print(n)
+  ps = numeric(0)
+  for (s in 1:10){
+      # get ex6 sampled data
+      sampled_ex6 = sampleTable(ex6, n)
+
+      # get into long form (each row as an observation)
+      sampled_ex6_df <- melt(sampled_ex6,id=c("w.ans.cat"),
+                             variable_name = "Answer.sample")
+      sampled_ex6_l = data.frame(matrix(NA, 
+                                        nrow = sum(sampled_ex6_df$value), 
+                                        ncol=2))
+      
+      #print(sampled_ex6)
+      counter = 1
+      for (i in 1:4){
+        for (j in 1:sampled_ex6_df[i, 3]){
+          if ((sampled_ex6_df[i, 3]) > 0) {
+            sampled_ex6_l[counter,c(1,2)] = sampled_ex6_df[i, c(1,2)]
+            counter = counter + 1
+          }
+        }
+      }
+      sampled_ex6_l$X1 = factor(sampled_ex6_l$X1)
+      sampled_ex6_l$w.ans.cat = revalue(sampled_ex6_l$X1,  
+                                        c("1"= "basic", "2"="sub"))
+      sampled_ex6_l$X2 = factor(sampled_ex6_l$X2)
+      sampled_ex6_l$Answer.sample = revalue(sampled_ex6_l$X2, 
+                                            c("1"="learner", "2"="teacher"))
+
+      sampled_ex6_l$exp = "exp6"
+      sampled_ex6_l = sampled_ex6_l[,-c(1,2)]
+      d.goodStim.turk$exp = "exp4_and_5"
+      
+      # bind two data sets together, distinguished by exp value
+      d_both = rbind(d.goodStim.turk, sampled_ex6_l)
+      
+      # run model and get p value
+      m = tidy(glm(w.ans.cat ~ Answer.sample * exp, d_both, family = "binomial"))
+      if (dim(m)[1] > 3) {
+         ps[s] = m[m$term == "Answer.samplelearner:expexp6", "p.value"] 
+      } else {
+         ps[s] = "NA"
+      }
+  }
+  prop_sig_ps[n] = length(which(ps < .05))/length(ps)
+}
+
+ex6.learner.estimated = sample_n(d.goodStim.lab.estimated[
+        d.goodStim.lab.estimated$Answer.sample == "learner",], round(n/2), replace = T)
+      
+      ex6.teacher.estimated = sample_n(d.goodStim.lab.estimated[
+        d.goodStim.lab.estimated$Answer.sample == "teacher",], round(n/2), replace = T)
+```
+
