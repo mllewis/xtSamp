@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  28 OCT 2015 13:10
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  6 NOV 2015 10:38
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -351,9 +351,9 @@ File: figures/stims.png Graphic file (type png)
 Package pdftex.def Info: figures/stims.png used on input line 70.
 (pdftex.def)             Requested size: 361.34999pt x 92.54852pt.
 
-Underfull \hbox (badness 6204) in paragraph at lines 71--71
+Underfull \hbox (badness 5832) in paragraph at lines 71--71
 []\OT1/ptm/m/it/10.95 Figure 1\OT1/ptm/m/n/10.95 . []Sam-ple stim-uli used in E
-x-per-i-ments 1-3 (left) and Ex-per-i-ment 4 and
+x-per-i-ments 1--3 (left) and Ex-per-i-ment 4 and
  []
 
 
@@ -369,9 +369,9 @@ ower subordinate-level
  []
 
 
-Underfull \hbox (badness 1337) in paragraph at lines 71--71
-\OT1/ptm/m/n/10.95 vari-abil-ity than the stim-uli used in Ex-per-i-ments 1-3. 
-All stim-uli can be ac-cessed here:
+Underfull \hbox (badness 1215) in paragraph at lines 71--71
+\OT1/ptm/m/n/10.95 vari-abil-ity than the stim-uli used in Ex-per-i-ments 1--3.
+ All stim-uli can be ac-cessed here:
  []
 
 <figures/screen.png, id=26, 522.2712pt x 253.9086pt>
@@ -400,17 +400,17 @@ Package pdftex.def Info: figures/FIG_3.pdf used on input line 220.
 
 [16 <./figures/FIG_3.pdf>] [17] [18] [19] [20] [21]
 
-Class apa Warning: \bibliographystyle command ignored on input line 315.
+Class apa Warning: \bibliographystyle command ignored on input line 318.
 
 (./xtSampRep.bbl [22] [23
 
 ]) [24] (./xtSampRep.aux) ) 
 Here is how much of TeX's memory you used:
- 3683 strings out of 493093
- 48911 string characters out of 6134989
- 117051 words of memory out of 5000000
+ 3687 strings out of 493093
+ 48933 string characters out of 6134989
+ 117084 words of memory out of 5000000
  7058 multiletter control sequences out of 15000+600000
- 41877 words of font info for 104 fonts, out of 8000000 for 9000
+ 44002 words of font info for 108 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,9n,35p,1556b,275s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2015/texmf-dist/fonts/enc/dvips/
@@ -422,7 +422,7 @@ y10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
 /texlive/2015/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2
 015/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2015/texmf-
 dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on xtSampRep.pdf (24 pages, 633123 bytes).
+Output written on xtSampRep.pdf (24 pages, 633947 bytes).
 PDF statistics:
  136 PDF objects out of 1000 (max. 8388607)
  93 compressed objects within 1 object stream

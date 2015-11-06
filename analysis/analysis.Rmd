@@ -934,11 +934,11 @@ tidy(stim.effect.model)
 glm power analysis
 ```{r exp6_power}
 # estimate effect size of E6
-fixed.effects.turk.goodStim = rma(r, c(.01, .01),
+fixed.effects.turk.goodStim = rma(d, c(.01, .01),
                                   data = all.es[6:7,], method = "FE")$b # exp 4 and 5
-fixed.effects.turk.badStim = rma(r, var.r,
+fixed.effects.turk.badStim = rma(d, var.r,
                                   data = all.es[3:4,], method = "FE")$b # exp 1 and 2
-fixed.effects.lab.badStim = all.es[5,"r"]
+fixed.effects.lab.badStim = all.es[5,"d"]
 personEffect = fixed.effects.lab.badStim - fixed.effects.turk.badStim 
 exp6_es = (fixed.effects.lab.badStim + personEffect)[1]
 
