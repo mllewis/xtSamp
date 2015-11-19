@@ -216,6 +216,8 @@ t1 <- colwise(as.factor)(t1)
 
 Filter.
 ```{r}
+dim(t1)[1] # total
+
 # get number of exclusions by category
 t1.exclusion.ns = t1 %>%
               summarise(n_noLabelParticipants = length(which(Answer.label != 'label')),
@@ -236,7 +238,7 @@ t1.f = t1 %>%
        filter(Answer.Qwcheck == 0)  %>% #check generalization question
        filter(Answer.question1 == 'TRUE') #filter question
 
-dim(t1)[1] # total
+
 dim(t1)[1] - t1.exclusion.ns[1,"n_noLabelParticipants"] - t1.exclusion.ns[1,"n_repeatWorkers"] # actual total
 dim(t1.f)[1] # total before other exclusions
 ```
@@ -850,20 +852,25 @@ welch_t_test(d1, d2, s1, s2, n1, n2)
 ```
 
 ```{r person_effect_power}
-# min person effect 
+# estimate person effect using Exp 3 vs. 1 and 2. 
 min_person_effect = all.es[all.es$exp == "Exp. 3", "d"] - 
   all.es[all.es$exp == "Exp. 2", "d"] 
 
-# max person effect
 max_person_effect = all.es[all.es$exp == "Exp. 3", "d"] - 
   all.es[all.es$exp == "Exp. 1", "d"] 
 
+# get sample size of experiment 4 and 5
 N_4_and_5 = all.es[all.es$exp == "Exp. 4", "N.total"] + 
   all.es[all.es$exp == "Exp. 5", "N.total"] 
 
+# do power analysis to figure out how many people would need for an additional experiment
+# with an effect size difference of person effect from expeirment 4 and 5
 pwr.t2n.test(d = min_person_effect, n1 = N_4_and_5, power = .8)
 pwr.t2n.test(d = max_person_effect, n1 = N_4_and_5, power = .8)
 ```
+
+
+
 
 Stimuli Effect
 ```{r stim_effect}
@@ -880,6 +887,15 @@ s2 = mod2$se^2
 
 welch_t_test(d1, d2, s1, s2, n1, n2)
 ```
+
+
+
+
+
+
+
+
+
 
 Testing moderators using logistic regression
 Person effect
