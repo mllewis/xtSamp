@@ -1,22 +1,16 @@
 ---
-output: html_document
+title: Xu and Tenenbaum 2007b Replication- Supplementary Information
+author: "Molly Lewis and Michael C. Frank"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+    theme: cerulean
 ---
-<h2> Xu and Tenenbaum 2007b Replication </h2>
-<h3> Supplementary Information </h3>
-
+  
 ***
 ***
-
-**TABLE OF CONTENTS**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(1) Original Xu and Tenenabum (2007b)](#o)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(2) Exp. 1 - online](#t1)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(3) Exp. 2 - online](#t2)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(4) Exp. 3 - in person](#l1)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(5) Exp. 4 - online](#t3)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(6) Exp. 5 - online](#t4)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(7) All](#all)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(8) Power Analysis for Exp. 5](#power5)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[(9) Analyses for possible moderators](#mods)** <br/>
 
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/xtSamp/blob/master/analysis/analysis.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/xtSamp/tree/master/data" target="_blank">raw data</a> with the code in this file. Experiments conducted online can be viewed 
  <a href="https://mllewis.github.io/projects/xtSamp/xtSampindex.html" target="_blank">here</a>.
@@ -95,7 +89,7 @@ get_bootstrapped_props <- function(df, conditionName, expName){
   return(props)
 }
 
-opts_chunk$set(echo = T, message = T, warning = T, error = T, cache = F)
+opts_chunk$set(echo = T, message = F, warning = F, error = F, cache = T)
 ```
 
 There are different possible criteria  for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently across questions as either a subordinate or a basic generalizer for each of the two trials. In contrast, we observed varied responses across questions by participants in our sample. Thus, we adopt two criteria in analyzing our data: a "strict" criteria where we only include participants if they responded consistently ("yes" or "no" to all basic-level questions and "yes" or "no" to all subordinate level questions), and a "liberal" criteria where we counted a particpant as a basic generalizer if they responded "yes" to any of the basic level questions. The results of the liberal criteria are reported in the Main Text, and the results of the strict criteria are reported in Appendix A.
@@ -106,8 +100,7 @@ strict = FALSE
 print(paste("Strict criteria: ", strict))
 ```
 
-<a name = "o"/>
-<h3> Original Xu and Tenenbaum (2007b) </h3>
+##  Original Xu and Tenenbaum (2007b) 
 
 X&T 2007b data - adults
 ```{r xt_adults}
@@ -201,8 +194,7 @@ xtc_tab = table(xt_data.children$Answer.sample, xt_data.children$response)
 chisq.test(xtc_tab)
 ```
 
-<a name = "t1"/>
-<h3> Experiment 1 </h3>
+## Experiment 1 - Turk Replication #1
 
 Read in data and pre-process.
 ```{r exp1}
@@ -228,6 +220,7 @@ t1.exclusion.ns = t1 %>%
                         n_badFilter = length(which(Answer.question1 == 'FALSE')))
 
 t1.exclusion.ns
+dim(t1)[1] - t1.exclusion.ns[1,"n_noLabelParticipants"] - t1.exclusion.ns[1,"n_repeatWorkers"] # actual total
 
 # subset data
 t1.f = t1 %>%
@@ -239,7 +232,6 @@ t1.f = t1 %>%
        filter(Answer.question1 == 'TRUE') #filter question
 
 
-dim(t1)[1] - t1.exclusion.ns[1,"n_noLabelParticipants"] - t1.exclusion.ns[1,"n_repeatWorkers"] # actual total
 dim(t1.f)[1] # total before other exclusions
 ```
 
@@ -260,8 +252,11 @@ t1.f$w.ans.cat[sub] <- "sub"
 t1.f$w.ans.cat[basic] <- "basic"
 t1.f$w.ans.cat = factor(t1.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
+# get other responeses
+others.t1 = filter(t1.f, w.ans.cat == "other")
+dim(others.t1)[1]
+
 # filter out other responses
-length(which(t1.f$w.ans.cat == "other"))
 t1.f = t1.f[t1.f$w.ans.cat != "other",]
 t1.f$w.ans.cat = droplevels(t1.f$w.ans.cat)
 
@@ -296,8 +291,8 @@ t1_tab = table(t1.f$w.ans.cat, t1.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t1_tab)
 ```
 
-<a name = "t2"/>
-<h3> Experiment 2 </h3>
+
+## Experiment 2 - Turk Replication #2
 
 Read in data and pre-process
 ```{r exp2}
@@ -331,7 +326,7 @@ t2.f = t2 %>%
       filter(Answer.question1 != 'true' | Answer.question2 != 'true' | 
                Answer.question3 == 'true' & Answer.question4 == 'true')  # take out those who missed attention check questions
 
-dim(t2)[1] # total
+
 dim(t2.f)[1] # total before "other" exlcusions
 ```
 
@@ -359,8 +354,11 @@ t2.f$w.ans.cat[sub] <- "sub"
 t2.f$w.ans.cat[basic] <- "basic"
 t2.f$w.ans.cat = factor(t2.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
-# filter out "other" responses
-length(which(t2.f$w.ans.cat == "other"))
+# get other responeses
+others.t2 = filter(t2.f, w.ans.cat == "other")
+dim(others.t2)[1]
+
+# filter out other responses
 t2.f = t2.f[t2.f$w.ans.cat != "other",]
 t2.f$w.ans.cat = droplevels(t2.f$w.ans.cat)
 
@@ -395,8 +393,7 @@ t2_tab = table(t2.f$w.ans.cat, t2.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t2_tab)
 ```
 
-<a name="l1"/>
-<h3> Experiment 3 - In Person Replication </h3>
+## Experiment 3 - In Person Replication 
 
 ```{r exp3}
 l1 <- read.csv("../data/anonymized/inlab_replication.csv")
@@ -445,8 +442,11 @@ l1.f$w.ans.cat[sub] <- "sub"
 l1.f$w.ans.cat[basic] <- "basic"
 l1.f$w.ans.cat <- factor(l1.f$w.ans.cat, c("sub","basic","other"))
 
-# filter out "other"" responses
-length(which(l1.f$w.ans.cat  == "other"))
+# get other responeses
+others.l1 = filter(l1.f, w.ans.cat == "other")
+dim(others.l1)[1]
+
+# filter out other responses
 l1.f = l1.f[l1.f$w.ans.cat != "other",]
 l1.f$w.ans.cat = droplevels(l1.f$w.ans.cat)
 
@@ -480,8 +480,7 @@ l1_tab = table(l1.f$w.ans.cat, l1.f$sample)[c("sub", "basic"),]
 chisq.test(l1_tab)
 ```
 
-<a name = "t3"/>
-<h3> Experiment 4 - Turk Replication #3 </h3>
+## Experiment 4 - Turk Replication #3
 
 Read in data and pre-process
 ```{r exp4}
@@ -539,8 +538,11 @@ t3.f$w.ans.cat[sub] <- "sub"
 t3.f$w.ans.cat[basic] <- "basic"
 t3.f$w.ans.cat = factor(t3.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
-# filter out "other"" responses
-length(which(t3.f$w.ans.cat == "other"))
+# get other responeses
+others.t3 = filter(t3.f, w.ans.cat == "other")
+dim(others.t3)[1]
+
+# filter out other responses
 t3.f = t3.f[t3.f$w.ans.cat != "other",]
 t3.f$w.ans.cat = droplevels(t3.f$w.ans.cat)
 
@@ -576,8 +578,7 @@ t3_tab = table(t3.f$w.ans.cat, t3.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t3_tab)
 ```
 
-<a name = "t4"/>
-<h3> Experiment 5 - Turk Replication #4 </h3>
+## Experiment 5 - Turk Replication #4 
 
 Read in data and pre-process
 ```{r exp5}
@@ -636,8 +637,11 @@ t4.f$w.ans.cat[basic] <- "basic"
 t4.f$w.ans.cat = factor(t4.f$w.ans.cat, 
                         levels = c("sub", "basic", "other"))
 
-# filter out "other"" responses
-length(which(t4.f$w.ans.cat == "other"))
+# filter out "other" responses
+others.t4 = filter(t4.f, w.ans.cat == "other")
+dim(others.t4)[1]
+
+# filter out other responses
 t4.f = t4.f[t4.f$w.ans.cat != "other",]
 t4.f$w.ans.cat = droplevels(t4.f$w.ans.cat)
 
@@ -673,8 +677,7 @@ t4_tab = table(t4.f$w.ans.cat, t4.f$Answer.sample)[c("sub", "basic"),]
 chisq.test(t4_tab)
 ```
 
-<a name = "all"/>
-<h3> All experiments </h3>
+## All experiments 
 
 All proportions
 ```{r all_props}
@@ -787,9 +790,8 @@ addpoly(random.effects.d, row = -1, cex = .75,
 #dev.off()
 ```
 
-<a name = "power5"/>
-<h3> Power analysis for Exp. 5 </h3>
-<h4> ES based on X&T adults and Exp 1-4  </h4>
+## Power analysis for Exp. 5 </h3>
+ES based on X&T adults and Exp 1-4
 
 ```{r exp5_power}
 # Note: Here we use r to estimate effect size, which is formally equivalent to phi. Phi is formally equivalent to omega for 2 x 2 tables, which is the effect size estimator used in the pwr.chisq.test function. Elsewhere, we work with effect sizes using d. 
@@ -819,8 +821,7 @@ print(paste("Extra: ", .35 * power.analysis$N))
 
 Thus, by the most conservative estimate (criteria: strict = T; fixed effect), we need a N of 363 to achieve 95% power. With approximately 35% data loss, this means we need to run an extra 127 to achieve this power. This is approximately 500 participants. 
 
-<a name = "mods"/>
-<h3> Analyses of possible moderators</h3>
+## Analyses of possible moderators 
 
 One possible reason for the difference between our observed effect sizes and the original is the presence of moderators. There are two notable differences between our experiments and the original: the online nature of several of our experiments, and the different stimuli used in Experiments 1-3. Here we test whether these moderators are reliable. 
 
@@ -851,7 +852,7 @@ s2 = all.es[all.es$exp == "Exp. 3", "var.d"]
 welch_t_test(d1, d2, s1, s2, n1, n2)
 ```
 
-```{r person_effect_power}
+```{r person_effect_power, eval = F}
 # estimate person effect using Exp 3 vs. 1 and 2. 
 min_person_effect = all.es[all.es$exp == "Exp. 3", "d"] - 
   all.es[all.es$exp == "Exp. 2", "d"] 
@@ -869,9 +870,6 @@ pwr.t2n.test(d = min_person_effect, n1 = N_4_and_5, power = .8)
 pwr.t2n.test(d = max_person_effect, n1 = N_4_and_5, power = .8)
 ```
 
-
-
-
 Stimuli Effect
 ```{r stim_effect}
 mod = predict(rma(d, var.d, data = all.es[3:4,], method = "FE"))
@@ -887,15 +885,6 @@ s2 = mod2$se^2
 
 welch_t_test(d1, d2, s1, s2, n1, n2)
 ```
-
-
-
-
-
-
-
-
-
 
 Testing moderators using logistic regression
 Person effect
@@ -1067,15 +1056,6 @@ tidy(glm(w.ans.cat ~ Answer.sample * exp, d_both2, family = "binomial"))
 
 
 
-
-
-
-
-
-
-
-
-
 ```{r, include = F, eval = F}
       #d_both <- colwise(as.factor)(d_both)
 
@@ -1181,3 +1161,158 @@ ex6.learner.estimated = sample_n(d.goodStim.lab.estimated[
         d.goodStim.lab.estimated$Answer.sample == "teacher",], round(n/2), replace = T)
 ```
 
+Plot "other" responses.
+```{r}
+response.patterns.t1 = others.t1 %>%
+  select(workerids, Answer.sample, c(13,14,21,23)) %>%
+  mutate(pattern = paste(Answer.Qwsmm1,  Answer.Qwsmm2, 
+                         Answer.Qwsm1, Answer.Qwsm2, sep = "")) %>%
+  mutate(pattern_basic = paste(Answer.Qwsmm1,  Answer.Qwsmm2, sep = "")) %>%
+  mutate(pattern_basic_null = ifelse(pattern_basic == "00", "no basic, inconsistent sub.", 
+                                     "some basic, inconsistent sub.")) %>%
+  select(workerids, Answer.sample, pattern, pattern_basic, pattern_basic_null) %>%
+  mutate(pattern = as.factor(pattern))
+
+p.other.t1 = ggplot(response.patterns.t1, aes(x = pattern)) + 
+  geom_bar(aes(y =..count.., fill = Answer.sample), position = "dodge") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ggtitle("Exp. 1") +
+  scale_fill_brewer(palette = "Set1") +
+  theme(legend.position="none") +
+  themeML
+
+pattern.sum.t1 = response.patterns.t1 %>%
+  group_by(Answer.sample, pattern_basic_null) %>%
+  summarise(n = n()) %>%
+  mutate(prop = n/sum(n))%>%
+  mutate(exp = "Exp. 1")
+
+response.patterns.t2 = others.t2 %>%
+  select(workerids, Answer.sample, c(2,3,5,6,7,15,16,17)) %>%
+  mutate(pattern = paste(Answer.Qbasic1,  Answer.Qbasic2, 
+                         Answer.Qbasic3, Answer.Qsub1, Answer.Qsub2, Answer.Qproper1,
+                         Answer.Qproper2, Answer.Qproper3, sep = "")) %>%
+  mutate(pattern_basic = paste(Answer.Qbasic1,  Answer.Qbasic2, 
+                         Answer.Qbasic3, sep = "")) %>%
+  mutate(pattern_basic_null = ifelse(pattern_basic == "000", "no basic, inconsistent sub.", 
+                                     "some basic, inconsistent sub.")) %>%
+  select(workerids, Answer.sample, pattern, pattern_basic, pattern_basic_null) %>%
+  mutate(pattern = as.factor(pattern))
+
+p.other.t2 = ggplot(response.patterns.t2, aes(x = pattern)) + 
+  geom_bar(aes(y =..count.., fill = Answer.sample), position = "dodge") +
+  ggtitle("Exp. 2") +
+  scale_y_continuous(breaks = c(0,2,4,6,8)) + 
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  themeML
+
+pattern.sum.t2 = response.patterns.t2 %>%
+  group_by(Answer.sample, pattern_basic_null) %>%
+  summarise(n = n()) %>%
+  mutate(prop = n/sum(n)) %>%
+  mutate(exp = "Exp. 2")
+
+response.patterns.l1 = others.l1 %>%
+  select(subjno, Answer.sample, c(10,12:15,17:19)) %>%
+  mutate(pattern = paste(basic1_a, basic1_b, basic2_a, basic2_b,
+                         sub1_a, sub1_b, sub2_a, sub2_b, sep = "")) %>%
+    mutate(pattern_basic = paste(basic1_a, basic1_b, basic2_a, basic2_b, sep = "")) %>%
+   mutate(pattern_basic_null = ifelse(pattern_basic == "0000", "no basic, inconsistent sub.", 
+                                     "some basic, inconsistent sub.")) %>%
+  select(subjno, Answer.sample, pattern, pattern_basic, pattern_basic_null) %>%
+  mutate(pattern = as.factor(pattern))
+
+p.other.l1 = ggplot(response.patterns.l1, aes(x = pattern)) + 
+  geom_bar(aes(y =..count.., fill = Answer.sample), position = "dodge") +
+  ggtitle("Exp. 3") +
+  scale_y_continuous(breaks = c(0,1,2)) + 
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  themeML
+
+pattern.sum.l1 = response.patterns.l1 %>%
+  group_by(Answer.sample, pattern_basic_null) %>%
+  summarise(n = n()) %>%
+  mutate(prop = n/sum(n)) %>%
+  mutate(exp = "Exp. 3")
+
+response.patterns.t3 = others.t3 %>%
+  select(workerids, Answer.sample, c(18,20:27)) %>%
+  mutate(pattern = paste(Answer.Qbasic1,  Answer.Qbasic2, 
+                         Answer.Qbasic3, Answer.Qsub1, Answer.Qsub2, Answer.Qproper1,
+                         Answer.Qproper2, Answer.Qproper3, sep = "")) %>%
+  mutate(pattern_basic = paste(Answer.Qbasic1,  Answer.Qbasic2, 
+                         Answer.Qbasic3, sep = "")) %>%
+  mutate(pattern_basic_null = ifelse(pattern_basic == "000", "no basic, inconsistent sub.", 
+                                     "some basic, inconsistent sub.")) %>%
+  select(workerids, Answer.sample, pattern, pattern_basic, pattern_basic_null) %>%
+  mutate(pattern = as.factor(pattern))
+
+p.other.t3 = ggplot(response.patterns.t3, aes(x = pattern)) + 
+  geom_bar(aes(y =..count.., fill = Answer.sample), position = "dodge") +
+  ggtitle("Exp. 4") +
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  themeML
+
+pattern.sum.t3 = response.patterns.t3 %>%
+  group_by(Answer.sample, pattern_basic_null) %>%
+  summarise(n = n()) %>%
+  mutate(prop = n/sum(n)) %>%
+  mutate(exp = "Exp. 4")
+
+
+response.patterns.t4 = others.t4 %>%
+  select(workerids, Answer.sample, c(18,20:27)) %>%
+  mutate(pattern = paste(Answer.Qbasic1,  Answer.Qbasic2, 
+                         Answer.Qbasic3, Answer.Qsub1, 
+                         Answer.Qsub2, Answer.Qproper1,
+                         Answer.Qproper2, Answer.Qproper3, sep = "")) %>%
+  mutate(pattern_basic = paste(Answer.Qbasic1,  Answer.Qbasic2, 
+                         Answer.Qbasic3, sep = "")) %>%
+  mutate(pattern_basic_null = ifelse(pattern_basic == "000", "no basic, inconsistent sub.", 
+                                     "some basic, inconsistent sub.")) %>%
+  select(workerids, Answer.sample, pattern, pattern_basic, pattern_basic_null) %>%
+  mutate(pattern = as.factor(pattern))
+
+p.other.t4 = ggplot(response.patterns.t4, aes(x = pattern)) + 
+  geom_bar(aes(y =..count.., fill = Answer.sample), position = "dodge") +
+  ggtitle("Exp. 5") +
+  #scale_fill_discrete(name="Condition") +
+  #theme(legend.position="bottom") +
+  #theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  themeML
+
+pattern.sum.t4 = response.patterns.t4 %>%
+  group_by(Answer.sample, pattern_basic_null) %>%
+  summarise(n = n()) %>%
+  mutate(prop = n/sum(n)) %>%
+  mutate(exp = "Exp. 5")
+
+
+all.pattern_basic_null = rbind(pattern.sum.t1, pattern.sum.t2, 
+                               pattern.sum.l1, pattern.sum.t3, pattern.sum.t4)
+
+#Exp.1: [basic-1, basic-2, sub-1, sub-2]
+#Exp. 2, 4 & 5: [basic-1, basic-2, basic-3, sub-1, sub-2, proper-1, proper-2, proper-3]
+#Exp. 3: [basic-1a, basic-1b, basic-2a, basic-2b, sub-1a, sub-1b, sub-2a, sub-2b ]
+
+
+ggplot(all.pattern_basic_null, aes(x = Answer.sample, 
+                                   y= prop,
+                                   fill = pattern_basic_null)) + 
+  geom_bar(stat = "identity", position = "stack") +
+  facet_grid(.~exp) +
+  scale_fill_discrete(name="") +
+  ylab("Prop excluded participants") +
+  xlab("Condition") +
+  ggtitle("Exclusion patterns") +
+  theme(legend.position="bottom") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  themeML
+
+
+
+```
