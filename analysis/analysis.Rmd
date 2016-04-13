@@ -1,6 +1,7 @@
 ---
-title: Xu and Tenenbaum 2007b Replication [Supplementary Information]
-author: "Molly Lewis and Michael C. Frank"
+title: X&T 2007b Replication
+subtitle: Supplementary Information
+author: Molly Lewis and Michael C. Frank
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -109,8 +110,8 @@ print(paste("Subordinate strict criteria: ", sub_strict))
 
 Get data - adults.
 ```{r xt_adults}
-N = 14
-N_per_condition = N/2  # 2 conditions (teacher + learner)
+N_adults = 14
+N_per_condition = N_adults/2  # 2 conditions (teacher + learner)
 # Note: The proportions described in the original report were obtained by aggregating across *trials* not participants (2 trials/participant). We correct for this here by taking the proportion of participants, which results in slightly different proportions than those reported in the original paper.
 
 # make raw data
@@ -142,8 +143,8 @@ xt.a.props = get_bootstrapped_props(xt_data.adults, "response",
 
 Get data - children.
 ```{r xt_children}
-N = 24
-N_per_condition = N/2 # 2 conditions
+N_child = 24
+N_per_condition = N_child /2 # 2 conditions
 
 # make raw data
 prop_sub_teacher = .71
@@ -171,6 +172,8 @@ xt.c.props = get_bootstrapped_props(xt_data.children,
                                     "response", "X&T (2007b) children")
 ```
 
+N =  <b> `r N_adults` </b> adults and  <b> `r N_child`</b> children in this study.
+
 ```{r, fig.width = 8}
 xt = rbind(xt.c.props, xt.a.props)
 
@@ -190,16 +193,19 @@ ggplot(xt, aes(x = response.cat, y = prop, fill = Answer.sample)) +
   themeML  
 ```
 
-Stats - adults.
+Stats: Pearson's Chi-squared test with Yates' continuity correction
+
+Adults.
 ```{r}
 xta_tab = table(xt_data.adults$Answer.sample, xt_data.adults$response)
-chisq.test(xta_tab)
+kable(tidy(chisq.test(xta_tab)))
+
 ```
 
-Stats - children.
+Children.
 ```{r}
 xtc_tab = table(xt_data.children$Answer.sample, xt_data.children$response)
-chisq.test(xtc_tab)
+kable(tidy(chisq.test(xtc_tab)))
 ```
 
 ### Exp. 1
@@ -215,7 +221,7 @@ t1 <- colwise(as.factor)(t1)
 ```
 
 Distribution of participants in preliminary exclusion criteria. 
-```{r}
+```{r }
 # get number of exclusions by category
 t1.exclusion.ns = t1 %>%
               summarise(n_noLabelParticipants = length(which(Answer.label != 'label')),
@@ -225,13 +231,12 @@ t1.exclusion.ns = t1 %>%
                         n_badGeneralize = length(which(Answer.Qwcheck != 0)),
                         n_badFilter = length(which(Answer.question1 == 'FALSE')))
 
-t1.exclusion.ns
+kable(gather(t1.exclusion.ns,"Exclusion category", "n"))
 ```
 
-Some participants were in another (not analyzed; "noLabel") condition. Below is the total N before any relevant exclusions.
+
 ```{r}
 total_n = dim(t1)[1] - t1.exclusion.ns[1,"n_noLabelParticipants"] - t1.exclusion.ns[1,"n_repeatWorkers"]
-print(paste("Total relevant N: ", total_n))
 
 # subset data
 t1.f = t1 %>%
@@ -241,10 +246,8 @@ t1.f = t1 %>%
                 Answer.click2 == "\"correct\"") %>% #correct training items (learning only)
        filter(Answer.Qwcheck == 0)  %>% #check generalization question
        filter(Answer.question1 == 'TRUE') #filter question
-
-print(paste("Total after preliminary exclusions: ",  dim(t1.f)[1] ))
 ```
-
+Some participants were in another, not analyzed condition ("noLabelParticipants"). The total number of participants before any relevant exclusions is N = <b> `r total_n`</b>. After preliminary exclusions, the total number of participants is N =  <b> `r dim(t1.f)[1]`</b>.
 
 Categorize response patterns based on response-pattern exclusion criterion.
 ```{r}
@@ -271,17 +274,21 @@ t1.f$w.ans.cat = factor(t1.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
 # get other responeses
 others.t1 = filter(t1.f, w.ans.cat == "other")
-print(paste("N `other' participants: ",  dim(others.t1)[1]))
 
 # filter out other responses
 t1.f = t1.f[t1.f$w.ans.cat != "other",]
 t1.f$w.ans.cat = droplevels(t1.f$w.ans.cat)
 ```
+The number of particpants whose generalization strategy could not be catgorized was<b>  `r  dim(others.t1)[1]`</b>. The final sample was N =  <b> `r  length(t1.f$Answer.sample)`</b>.
 
-Final sample.
+Distribution of final sample of participants across conditions.
 ```{r}
-print(paste("N =",  length(t1.f$Answer.sample)))
-summary(t1.f$Answer.sample)
+final.cond.counts.t1 = t1.f %>%
+  rename(Condition = Answer.sample) %>%
+  group_by(Condition) %>%
+  summarise(n = n())
+  
+kable(final.cond.counts.t1)
 ```
 
 Get props.
@@ -304,12 +311,11 @@ t1.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats.
+Stats: Pearson's Chi-squared test with Yates' continuity correction
 ```{r}
 t1_tab = table(t1.f$w.ans.cat, t1.f$Answer.sample)[c("sub", "basic"),]
-chisq.test(t1_tab)
+kable(tidy(chisq.test(t1_tab)))
 ```
-
 
 ### Exp. 2
 
@@ -322,11 +328,8 @@ t2  <- t2 [,c(-1:-19,-21:-32,-36,-41:-43,-54:-55,-56)] # remove unnecessary colu
 t2$Answer.sample <- factor(t2$Answer.sample,
                            labels = c('teacher','learner')) # sample0 = teacher, sample1 = learner
 t2 <- colwise(as.factor)(t2)
-
-print(paste("Total N:",  dim(t2)[1]))
-
 ```
-
+The total before any exclusions is N = <b>  `r  dim(t2)[1]`</b>.
 
 Distribution of participants in preliminary exclusion criteria.
 ```{r}
@@ -339,7 +342,8 @@ t2.exclusion.ns = t2 %>%
                                                      Answer.question2 != 'true' | 
                                                      Answer.question3 != 'true' | 
                                                      Answer.question4 !='true')))
-t2.exclusion.ns
+kable(gather(t2.exclusion.ns,"Exclusion category", "n"))
+
 
 # subset data
 t2.f = t2 %>%
@@ -348,9 +352,8 @@ t2.f = t2 %>%
       filter(Answer.Qcheck1 == 0 & Answer.Qcheck2 == 0) %>% # take out if missed check generalization question
       filter(Answer.question1 != 'true' | Answer.question2 != 'true' | 
                Answer.question3 == 'true' & Answer.question4 == 'true')  # take out those who missed attention check questions
-
-print(paste("Total after preliminary exclusions:",  dim(t2.f)[1]))
 ```
+The total after preliminary exclusions is N = <b>  `r dim(t2.f)[1]`</b>.
 
 Categorize response patterns based on response-pattern exclusion criterion.
 ```{r}
@@ -385,17 +388,21 @@ t2.f$w.ans.cat = factor(t2.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
 # get other responeses
 others.t2 = filter(t2.f, w.ans.cat == "other")
-print(paste("N `other' participants:",  dim(others.t2)[1]))
 
 # filter out other responses
 t2.f = t2.f[t2.f$w.ans.cat != "other",]
 t2.f$w.ans.cat = droplevels(t2.f$w.ans.cat)
 ```
+The number of particpants whose generalization strategy could not be catgorized was<b>  `r  dim(others.t2)[1]`</b>. The final sample was N = <b>  `r  length(t2.f$Answer.sample)`</b>.
 
-Final sample.
+Distribution of final sample of participants across conditions.
 ```{r}
-print(paste("N =",  length(t2.f$Answer.sample)))
-summary(t2.f$Answer.sample)
+final.cond.counts.t2 = t2.f %>%
+  rename(Condition = Answer.sample) %>%
+  group_by(Condition) %>%
+  summarise(n = n())
+  
+kable(final.cond.counts.t2)
 ```
 
 Get props.
@@ -418,10 +425,10 @@ t2.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats.
+Stats: Pearson's Chi-squared test with Yates' continuity correction
 ```{r}
 t2_tab = table(t2.f$w.ans.cat, t2.f$Answer.sample)[c("sub", "basic"),]
-chisq.test(t2_tab)
+kable(tidy(chisq.test(t2_tab)))
 ```
 
 ### Exp. 3
@@ -433,22 +440,22 @@ l1 <- read.csv("../data/anonymized/inlab_replication.csv")
 # make factors
 l1 <- colwise(as.factor)(l1)
 names(l1)[names(l1) == "sample"] = "Answer.sample"
-print(paste("Total N:", dim(l1)[1]))
 ```
+The total before any exclusions is N = <b>  `r  dim(l1)[1]`</b>.
 
 Distribution of participants in preliminary exclusion criteria.
 ```{r}
 l1.exclusion.ns = l1 %>%
                   summarise(n_badTraining = length(
                     which(t2_a == 0 | t3_a == 0 |t2_b == 0 | t2_b == 0)))
-l1.exclusion.ns
+kable(gather(l1.exclusion.ns,"Exclusion category", "n"))
+
 
 # subset data to those with correct training
 l1.f = l1 %>%
        filter(t2_a == 1 & t3_a == 1 & t2_b == 1 & t2_b == 1)
-
-print(paste("Total after preliminary exclusions:",  dim(l1.f)[1]))
 ```
+The total after preliminary exclusions is N = <b> `r dim(l1.f)[1]`</b>.
 
 Categorize response patterns based on response-pattern exclusion criterion.
 ```{r}
@@ -483,17 +490,21 @@ l1.f$w.ans.cat <- factor(l1.f$w.ans.cat, c("sub","basic","other"))
 
 # get other responeses
 others.l1 = filter(l1.f, w.ans.cat == "other")
-print(paste("N `other' participants:", dim(others.l1)[1]))
 
 # filter out other responses
 l1.f = l1.f[l1.f$w.ans.cat != "other",]
 l1.f$w.ans.cat = droplevels(l1.f$w.ans.cat)
 ```
+The number of particpants whose generalization strategy could not be catgorized was <b> `r  dim(others.l1)[1]`</b>. The final sample was N = <b>  `r  length(l1.f$Answer.sample)`</b>.
 
-Final sample.
+Distribution of final sample of participants across conditions.
 ```{r}
-length(l1.f$Answer.sample)
-summary(l1.f$Answer.sample)
+final.cond.counts.l1 = l1.f %>%
+  rename(Condition = Answer.sample) %>%
+  group_by(Condition) %>%
+  summarise(n = n())
+  
+kable(final.cond.counts.l1)
 ```
 
 Get props.
@@ -515,10 +526,10 @@ l1.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats.
+Stats: Pearson's Chi-squared test with Yates' continuity correction
 ```{r}
 l1_tab = table(l1.f$w.ans.cat, l1.f$sample)[c("sub", "basic"),]
-chisq.test(l1_tab)
+kable(tidy(chisq.test(l1_tab)))
 ```
 
 ### Exp. 4
@@ -531,8 +542,9 @@ t3 <- read.csv("../data/anonymized/turk_replication_3_A.csv")
 t3$Answer.sample <- factor(t3$Answer.sample, 
                            labels=c('teacher','learner')) # sample0 = teacher, sample1 = learner
 t3 <- colwise(as.factor)(t3)
-print(paste("Total N:", dim(t3)[1]))
 ```
+The total before any exclusions is N = <b>  `r dim(t3)[1]`</b>.
+
 
 Distribution of participants in preliminary exclusion criteria.
 ```{r}
@@ -542,7 +554,8 @@ t3.exclusion.ns = t3 %>%
                         n_badGeneralize = length(which(Answer.Qcheck1 != 0 | Answer.Qcheck2 != 0)),
                         n_badFilter = length(which(Answer.question1 != 'TRUE' | Answer.question2 != 'TRUE'| 
                                 Answer.question3 != 'TRUE' | Answer.question4 != 'TRUE')))
-t3.exclusion.ns
+
+kable(gather(t3.exclusion.ns,"Exclusion category", "n"))
 
 # subset data
 t3.f = t3 %>%
@@ -551,9 +564,8 @@ t3.f = t3 %>%
       filter(Answer.Qcheck1 == 0 & Answer.Qcheck2 == 0) %>% # take out if missed check generalization question
       filter(Answer.question1 == 'TRUE' & Answer.question2 == 'TRUE' & 
             Answer.question3 == 'TRUE' & Answer.question4 == 'TRUE') # take out those who missed filter question
-
-print(paste("Total after preliminary exclusions:", dim(t3.f)[1]))
 ```
+The total after preliminary exclusions is N = <b>  `r dim(t3.f)[1]`</b>.
 
 Categorize response patterns based on response-pattern exclusion criterion.
 ```{r}
@@ -588,17 +600,21 @@ t3.f$w.ans.cat = factor(t3.f$w.ans.cat, levels = c("sub", "basic", "other"))
 
 # get other responses
 others.t3 = filter(t3.f, w.ans.cat == "other")
-print(paste("N `other' participants:", dim(others.t3)[1]))
 
 # filter out other responses
 t3.f = t3.f[t3.f$w.ans.cat != "other",]
 t3.f$w.ans.cat = droplevels(t3.f$w.ans.cat)
 ```
+The number of particpants whose generalization strategy could not be catgorized was <b> `r  dim(others.t3)[1]`</b>. The final sample was N = <b>  `r  length(t3.f$Answer.sample)`</b>.
 
-Final sample.
+Distribution of final sample of participants across conditions.
 ```{r}
-print(paste("N = ",  length(t3.f$Answer.sample)))
-summary(t3.f$Answer.sample)
+final.cond.counts.t3 = t3.f %>%
+  rename(Condition = Answer.sample) %>%
+  group_by(Condition) %>%
+  summarise(n = n())
+  
+kable(final.cond.counts.t3)
 ```
 
 Get props.
@@ -622,10 +638,10 @@ t3.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats.
+Stats: Pearson's Chi-squared test with Yates' continuity correction
 ```{r}
 t3_tab = table(t3.f$w.ans.cat, t3.f$Answer.sample)[c("sub", "basic"),]
-chisq.test(t3_tab)
+kable(tidy(chisq.test(t3_tab)))
 ```
 
 ### Exp. 5
@@ -638,8 +654,8 @@ t4 <- read.csv("../data/anonymized/turk_replication_4_A.csv")
 t4$Answer.sample <- factor(t4$Answer.sample, 
                            labels = c('teacher','learner')) # sample0 = teacher, sample1 = learner
 t4 <- colwise(as.factor)(t4)
-print(paste("Total N:", dim(t4)[1]))
 ```
+The total before any exclusions is N = <b>  `r dim(t4)[1]`</b>.
 
 Distribution of participants in preliminary exclusion criteria.
 ```{r}
@@ -649,7 +665,7 @@ t4.exclusion.ns = t4 %>%
                         n_badGeneralize = length(which(Answer.Qcheck1 != 0 | Answer.Qcheck2 != 0)),
                         n_badFilter = length(which(Answer.question1 != 'TRUE' | Answer.question2 !='TRUE'| 
                                 Answer.question3 != 'TRUE' | Answer.question4 !='TRUE')))
-t4.exclusion.ns
+kable(gather(t4.exclusion.ns, "Exclusion category", "n"))
 
 # subset data
 t4.f = t4 %>%
@@ -659,8 +675,8 @@ t4.f = t4 %>%
       filter(Answer.question1 == 'TRUE' & Answer.question2 == 'TRUE' & 
             Answer.question3 == 'TRUE' & Answer.question4 == 'TRUE')# take out those who missed filter question
 
-print(paste("Total after preliminary exclusions:",  dim(t4.f)[1]))
 ```
+The total after preliminary exclusions is N = <b>   `r dim(t4.f)[1]`</b>.
 
 Categorize response patterns based on response-pattern exclusion criterion.
 ```{r}
@@ -696,17 +712,22 @@ t4.f$w.ans.cat = factor(t4.f$w.ans.cat,
 
 # filter out "other" responses
 others.t4 = filter(t4.f, w.ans.cat == "other")
-print(paste("N `other' participants:", dim(others.t4)[1]))
 
 # filter out other responses
 t4.f = t4.f[t4.f$w.ans.cat != "other",]
 t4.f$w.ans.cat = droplevels(t4.f$w.ans.cat)
 ```
 
-Final sample.
+The number of particpants whose generalization strategy could not be catgorized was<b>  `r  dim(others.t4)[1]`</b>. The final sample was N = <b>  `r length(t4.f$Answer.sample)`</b>.
+
+Distribution of final sample of participants across conditions.
 ```{r}
-print(paste("N =", length(t4.f$Answer.sample)))
-summary(t4.f$Answer.sample)
+final.cond.counts.t4 = t4.f %>%
+  rename(Condition = Answer.sample) %>%
+  group_by(Condition) %>%
+  summarise(n = n())
+  
+kable(final.cond.counts.t4)
 ```
 
 Get props.
@@ -730,10 +751,10 @@ t4.f.props %>%
   scale_fill_brewer(name = "Sampling\nCondition", palette = "Set1")
 ```
 
-Stats.
+Stats: Pearson's Chi-squared test with Yates' continuity correction
 ```{r}
 t4_tab = table(t4.f$w.ans.cat, t4.f$Answer.sample)[c("sub", "basic"),]
-chisq.test(t4_tab)
+kable(tidy(chisq.test(t4_tab)))
 ```
 
 <br> 
@@ -799,6 +820,7 @@ all.data.f.props %>%
 ```
 
 ### Grand effect size estimate
+
 ```{r all_es}
 # spread props and n_cond
 all.data.f.props.basic = all.data.f.props %>%
@@ -825,6 +847,8 @@ all.es = propes(all.data.f.props.basic$learner_prop,
 
 all.es$exp = all.data.f.props.basic$exp # add exp ids
 ```
+
+#### All experiments
 
 Fixed effects
 ```{r}
@@ -855,11 +879,41 @@ addpoly(random.effects.d, row = -1, cex = .75,
 #dev.off()
 ```
 
+#### Experiments with "good" stimuli only 
+
+Fixed effects
+```{r}
+fixed.effects.d.sub= rma(d, var.d, data = all.es[c(-3:-5),], method = "FE")
+fixed.effects.d.sub
+```
+
+Random effects
+```{r}
+random.effects.d.sub = rma(d, var.d, data = all.es[c(-3:-5),])
+random.effects.d.sub
+```
+
+```{r}
+#pdf("../writeup/figures/FIG_4.pdf", height = 5, width = 8)
+par(cex = 1, font = 1)
+forest(random.effects.d.sub, 
+       slab = all.es[c(-3:-5),]$exp,
+       mlab = "All", 
+       xlab = "Cohen's d")
+par(font = 2)
+text(-2.5, 5.8, "Experiment")
+text(5, 5.8, "Cohen's d [95% CI]")
+
+addpoly(random.effects.d.sub, row = -1, cex = .75, 
+        annotate = F,  col = "red", mlab = "", efac = 2)
+#dev.off()
+```
+
 ### Power analysis for Exp. 5 
 
 ES based on X&T adults and Exp 1-4
 
-```{r exp5_power, eval = F}
+```{r exp5_power}
 # Note: Here we use r to estimate effect size, which is formally equivalent to phi. Phi is formally equivalent to omega for 2 x 2 tables, which is the effect size estimator used in the pwr.chisq.test function. Elsewhere, we work with effect sizes using d. 
 
 # fixed effects
@@ -896,13 +950,10 @@ Thus, by the most conservative estimate (criteria: basic_strict & sub_strict = T
 
 One possible reason for the difference between our observed effect sizes and the original is the presence of moderators. There are two notable differences between our experiments and the original: the online nature of several of our experiments, and the different stimuli used in Experiments 1-3. Here we test whether these moderators are reliable. 
 
-#### Testing for moderators with t-tests
-##### Person effect
-```{r person_effect, eval = F}
-
+#### Person effect -- Does online vs. in lab matter?
+```{r person_effect}
 # Welch's t-test
-# s = variance
-welch_t_test <- function(d1, d2, s1, s2, n1, n2){
+welch_t_test <- function(d1, d2, s1, s2, n1, n2){ # s = variance
   t = (d1 - d2)/sqrt((s1/n1) + (s2/n2))
   df = ((s1/n1) + (s2/n2))^2 / (((s1/n1)^2/(n1-1)) + ((s2/n2)^2/(n2-1)))
   p = 2*(1-pt(abs(t),df))
@@ -915,7 +966,7 @@ welch_t_test <- function(d1, d2, s1, s2, n1, n2){
 mod = predict(rma(d, var.d, data = all.es[3:4,], method = "FE"))
 d1 = mod$pred  
 n1 = (all.es[all.es$exp == "Exp. 1", "N.total"] +
-        all.es[all.es$exp == "Exp. 2", "N.total"])/2
+        all.es[all.es$exp == "Exp. 2", "N.total"])/2 # mean(exp1, exp2)
 s1 = mod$se^2
 d2 = all.es[all.es$exp == "Exp. 3", "d"]  
 n2 = all.es[all.es$exp == "Exp. 3", "N.total"]  
@@ -924,7 +975,8 @@ s2 = all.es[all.es$exp == "Exp. 3", "var.d"]
 welch_t_test(d1, d2, s1, s2, n1, n2)
 ```
 
-```{r person_effect_power, eval = F}
+#### Person effect power -- How many additional participants would we need to detect this difference?
+```{r person_effect_power}
 # estimate person effect using Exp 3 vs. 1 and 2. 
 min_person_effect = all.es[all.es$exp == "Exp. 3", "d"] - 
   all.es[all.es$exp == "Exp. 2", "d"] 
@@ -938,12 +990,12 @@ N_4_and_5 = all.es[all.es$exp == "Exp. 4", "N.total"] +
 
 # do power analysis to figure out how many people would need for an additional experiment
 # with an effect size difference of person effect from expeirment 4 and 5
-pwr.t2n.test(d = min_person_effect, n1 = N_4_and_5, power = .8)
+#pwr.t2n.test(d = min_person_effect, n1 = N_4_and_5, power = .8)
 pwr.t2n.test(d = max_person_effect, n1 = N_4_and_5, power = .8)
 ```
 
-##### Stimuli effect
-```{r stim_effect, eval = F}
+#### Stimuli effect -- Does the stimuli type mattter?
+```{r stim_effect}
 mod = predict(rma(d, var.d, data = all.es[3:4,], method = "FE"))
 d1 = mod$pred  
 n1 = (all.es[all.es$exp == "Exp. 1", "N.total"] +
@@ -958,58 +1010,8 @@ s2 = mod2$se^2
 welch_t_test(d1, d2, s1, s2, n1, n2)
 ```
 
-#### Testing for moderators with logistic regression
-
-##### Person effect
-```{r, eval = F}
-all.data.f$exp2 = as.factor(ifelse(all.data.f$exp == "Exp. 1"|
-                           all.data.f$exp == "Exp. 2", "web.badStim", 
-                         ifelse( all.data.f$exp == "Exp. 3", "lab.badStim", 
-                                 ifelse(all.data.f$exp == "Exp. 4"|
-                           all.data.f$exp == "Exp. 5", "web.goodStim", all.data.f$exp))))
-
-person.effect.model = glm(w.ans.cat ~ Answer.sample + exp2, 
-    data = all.data.f[all.data.f$exp2 == "web.badStim" |
-                        all.data.f$exp2 == "lab.badStim", ], 
-    family = "binomial")
-tidy(person.effect.model)
-
-
-person.effect.model = glm(w.ans.cat ~ Answer.sample * exp2, 
-    data = all.data.f[all.data.f$exp2 == "web.badStim" |
-                        all.data.f$exp2 == "lab.badStim", ], 
-    family = "binomial")
-tidy(person.effect.model)
-```
-
-##### Stimuli effect
-```{r, eval = F}
-all.data.f$exp2 = as.factor(ifelse(all.data.f$exp == "Exp. 1"|
-                           all.data.f$exp == "Exp. 2", "web.badStim", 
-                         ifelse( all.data.f$exp == "Exp. 3", "lab.badStim", 
-                                 ifelse(all.data.f$exp == "Exp. 4"|
-                           all.data.f$exp == "Exp. 5", "web.goodStim", all.data.f$exp))))
-
-stim.effect.model = glm(w.ans.cat ~ Answer.sample + exp2, 
-    data = all.data.f[all.data.f$exp2 == "web.badStim" |
-                        all.data.f$exp2 == "web.goodStim", ], 
-    family = "binomial")
-tidy(stim.effect.model)
-
-all.data.f$exp2 = as.factor(ifelse(all.data.f$exp == "Exp. 1"|
-                           all.data.f$exp == "Exp. 2", "web.badStim", 
-                         ifelse( all.data.f$exp == "Exp. 3", "lab.badStim", 
-                                 ifelse(all.data.f$exp == "Exp. 4"|
-                           all.data.f$exp == "Exp. 5", "web.goodStim", all.data.f$exp))))
-
-stim.effect.model = glm(w.ans.cat ~ Answer.sample * exp2, 
-    data = all.data.f[all.data.f$exp2 == "web.badStim" |
-                        all.data.f$exp2 == "web.goodStim", ], 
-    family = "binomial")
-tidy(stim.effect.model)
-```
-
 ### Overall power analysis (GLM)
+Suppose
 ```{r exp6_power, eval = F}
 # estimate effect size of E6
 fixed.effects.turk.goodStim = rma(d, c(.01, .01),
@@ -1126,113 +1128,6 @@ d_both2 = colwise(as.factor)(d_both2)
 tidy(glm(w.ans.cat ~ Answer.sample * exp, d_both2, family = "binomial"))
 
 ```
-
-
-```{r, include = F, eval = F}
-      #d_both <- colwise(as.factor)(d_both)
-
-sampleTable <- function(Full, n) {
-    Frame <- expand.grid(lapply(dim(Full), seq))
-    m = table(Frame[sample(1:nrow(Frame), n, prob = Full, replace = TRUE), ])
-
-    # check dimensions
-    dim_check = (dim(m) == c(2,2))
-    if (all(dim_check)){
-        colnames(m) <- colnames(e4_and_5)
-        rownames(m) <- rownames(e4_and_5)
-    } else if (all(dim_check == FALSE)) {
-        missing = setdiff(c("1", "2"), rownames(m))
-        shared = intersect(c("1", "2"), rownames(m))
-        m = rbind(m, c(0))
-        rownames(m)[2] = rownames(e4_and_5)[as.numeric(missing)]
-        rownames(m)[1] = rownames(e4_and_5)[as.numeric(shared)]
-        missing = setdiff(c("1", "2"), colnames(m))
-        shared = intersect(c("1", "2"), colnames(m))
-        m = cbind(m, c(0, 0))
-        colnames(m)[2] = colnames(e4_and_5)[as.numeric(missing)]
-        colnames(m)[1] = colnames(e4_and_5)[as.numeric(shared)]
-    } else {
-       if (!(dim_check)[1]){
-        missing = setdiff(c("1", "2"), rownames(m))
-        shared = intersect(c("1", "2"), rownames(m))
-        m = rbind(m, c(0, 0))
-        rownames(m)[2] = rownames(e4_and_5)[as.numeric(missing)]
-        rownames(m)[1] = rownames(e4_and_5)[as.numeric(shared)]
-        colnames(m) = colnames(e4_and_5)
-      }
-      if (!(dim_check)[2]){
-        missing = setdiff(c("1", "2"), colnames(m))
-        shared = intersect(c("1", "2"), colnames(m))
-        m = cbind(m, c(0, 0))
-        colnames(m)[2] = colnames(e4_and_5)[as.numeric(missing)]
-        colnames(m)[1] = colnames(e4_and_5)[as.numeric(shared)]
-        rownames(m) = rownames(e4_and_5)
-      }
-    }
-    
-    m <- m[rownames(e4_and_5),colnames(e4_and_5)]
-    m
-}
-
-
-# run power simulation
-prop_sig_ps = numeric(0)
-for (n in seq(1000,10000,1000)){
-  print(n)
-  ps = numeric(0)
-  for (s in 1:10){
-      # get ex6 sampled data
-      sampled_ex6 = sampleTable(ex6, n)
-
-      # get into long form (each row as an observation)
-      sampled_ex6_df <- melt(sampled_ex6,id=c("w.ans.cat"),
-                             variable_name = "Answer.sample")
-      sampled_ex6_l = data.frame(matrix(NA, 
-                                        nrow = sum(sampled_ex6_df$value), 
-                                        ncol=2))
-      
-      #print(sampled_ex6)
-      counter = 1
-      for (i in 1:4){
-        for (j in 1:sampled_ex6_df[i, 3]){
-          if ((sampled_ex6_df[i, 3]) > 0) {
-            sampled_ex6_l[counter,c(1,2)] = sampled_ex6_df[i, c(1,2)]
-            counter = counter + 1
-          }
-        }
-      }
-      sampled_ex6_l$X1 = factor(sampled_ex6_l$X1)
-      sampled_ex6_l$w.ans.cat = revalue(sampled_ex6_l$X1,  
-                                        c("1"= "basic", "2"="sub"))
-      sampled_ex6_l$X2 = factor(sampled_ex6_l$X2)
-      sampled_ex6_l$Answer.sample = revalue(sampled_ex6_l$X2, 
-                                            c("1"="learner", "2"="teacher"))
-
-      sampled_ex6_l$exp = "exp6"
-      sampled_ex6_l = sampled_ex6_l[,-c(1,2)]
-      d.goodStim.turk$exp = "exp4_and_5"
-      
-      # bind two data sets together, distinguished by exp value
-      d_both = rbind(d.goodStim.turk, sampled_ex6_l)
-      
-      # run model and get p value
-      m = tidy(glm(w.ans.cat ~ Answer.sample * exp, d_both, family = "binomial"))
-      if (dim(m)[1] > 3) {
-         ps[s] = m[m$term == "Answer.samplelearner:expexp6", "p.value"] 
-      } else {
-         ps[s] = "NA"
-      }
-  }
-  prop_sig_ps[n] = length(which(ps < .05))/length(ps)
-}
-
-ex6.learner.estimated = sample_n(d.goodStim.lab.estimated[
-        d.goodStim.lab.estimated$Answer.sample == "learner",], round(n/2), replace = T)
-      
-      ex6.teacher.estimated = sample_n(d.goodStim.lab.estimated[
-        d.goodStim.lab.estimated$Answer.sample == "teacher",], round(n/2), replace = T)
-```
-
 ### Pattern of "other" responses
 
 ```{r}
