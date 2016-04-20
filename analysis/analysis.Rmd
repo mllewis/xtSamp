@@ -88,7 +88,7 @@ get_bootstrapped_props <- function(df, conditionName, expName){
 }
 
 opts_chunk$set(echo = T, message = F, warning = F, 
-               error = F, cache = T, tidy = F)
+               error = F, cache = F, tidy = F)
 ```
 
 _A note on exclusions_: There are several possible criteria  for categorizing a participant as a subordinate or basic-level generalizer. X&T find that participants respond consistently across questions as either a subordinate or a basic generalizer for each of the two trials. In contrast, we observed varied responses across questions by participants in our sample. Thus, we adopt two criteria in analyzing our data: a "basic strict" criteria where we only include participants if they responded consistently ("yes" or "no" to all basic-level questions and "yes" or "no" to all subordinate level questions, "basic strict" = T), and a "liberal" criteria where we counted a particpant as a basic generalizer if they responded "yes" to any of the basic level questions ("basic strict" = F). The results of the liberal criteria are reported in the Main Text, and the results of the strict criteria are reported in Appendix A. In a set of post-hoc analyses, we also analyzed the data by varying the exclusion criteria for consistency in the subordinate category ("subordinate strict").
@@ -233,7 +233,6 @@ t1.exclusion.ns = t1 %>%
 
 kable(gather(t1.exclusion.ns,"Exclusion category", "n"))
 ```
-
 
 ```{r}
 total_n = dim(t1)[1] - t1.exclusion.ns[1,"n_noLabelParticipants"] - t1.exclusion.ns[1,"n_repeatWorkers"]
@@ -944,11 +943,11 @@ Thus, by the most conservative estimate (criteria: basic_strict & sub_strict = T
 <br> 
 <br> 
 
-## Post-hoc Analyses
+## Additonal Analyses
 
 ### Moderators 
 
-One possible reason for the difference between our observed effect sizes and the original is the presence of moderators. There are two notable differences between our experiments and the original: the online nature of several of our experiments, and the different stimuli used in Experiments 1-3. Here we test whether these moderators are reliable. 
+One possible reason for the difference between our observed effect sizes and the original is the presence of moderators. There are two notable differences between our experiments and the original: the online nature of several of our experiments ("person effect"), and the different stimuli used in Experiments 1-3 relative to Experiments 4 and 5 ("stimuli effect"). Here we test whether these moderators are reliable, and the number of participants that would be needed in an additional experiment that would allows us to directly test the role of this moderator.
 
 #### Person effect -- Does online vs. in lab matter?
 ```{r person_effect}
@@ -963,171 +962,67 @@ welch_t_test <- function(d1, d2, s1, s2, n1, n2){ # s = variance
   results
 }
 
-mod = predict(rma(d, var.d, data = all.es[3:4,], method = "FE"))
+## compare Exp 1 and 2 (online) to Exp. 3 (in lab)
+# Exp. 1 and 2
+mod = predict(rma(d, var.d, data = all.es[3:4,])) # FE vs. RE doesn't matter.
+
 d1 = mod$pred  
 n1 = (all.es[all.es$exp == "Exp. 1", "N.total"] +
         all.es[all.es$exp == "Exp. 2", "N.total"])/2 # mean(exp1, exp2)
 s1 = mod$se^2
+
+# Exp. 3
 d2 = all.es[all.es$exp == "Exp. 3", "d"]  
 n2 = all.es[all.es$exp == "Exp. 3", "N.total"]  
 s2 = all.es[all.es$exp == "Exp. 3", "var.d"]
 
+# compare
 welch_t_test(d1, d2, s1, s2, n1, n2)
 ```
 
 #### Person effect power -- How many additional participants would we need to detect this difference?
+
+Get person effect using Exp 3 vs. 1 and 2. 
 ```{r person_effect_power}
-# estimate person effect using Exp 3 vs. 1 and 2. 
 min_person_effect = all.es[all.es$exp == "Exp. 3", "d"] - 
   all.es[all.es$exp == "Exp. 2", "d"] 
 
 max_person_effect = all.es[all.es$exp == "Exp. 3", "d"] - 
   all.es[all.es$exp == "Exp. 1", "d"] 
+```
 
-# get sample size of experiment 4 and 5
+Get sample size of experiment 4 and 5
+```{r}
 N_4_and_5 = all.es[all.es$exp == "Exp. 4", "N.total"] + 
   all.es[all.es$exp == "Exp. 5", "N.total"] 
+```
 
-# do power analysis to figure out how many people would need for an additional experiment
-# with an effect size difference of person effect from expeirment 4 and 5
-#pwr.t2n.test(d = min_person_effect, n1 = N_4_and_5, power = .8)
+Do power analysis to estimate Exp. 6 n, based on the min effect size estimate.
+```{r}
+try(pwr.t2n.test(d = min_person_effect, n1 = N_4_and_5, power = .8))
+```
+
+Do power analysis to estimate Exp. 6 n, based on the max effect size estimate.
+```{r}
 pwr.t2n.test(d = max_person_effect, n1 = N_4_and_5, power = .8)
 ```
 
-#### Stimuli effect -- Does the stimuli type mattter?
-```{r stim_effect}
-mod = predict(rma(d, var.d, data = all.es[3:4,], method = "FE"))
-d1 = mod$pred  
-n1 = (all.es[all.es$exp == "Exp. 1", "N.total"] +
-        all.es[all.es$exp == "Exp. 2", "N.total"])/2
-s1 = mod$se^2
-mod2 = predict(rma(d, var.d, data = all.es[6:7,], method = "FE"))
-d2 = mod2$pred  
-n2 = (all.es[all.es$exp == "Exp. 4", "N.total"] +
-        all.es[all.es$exp == "Exp. 5", "N.total"])/2
-s2 = mod2$se^2
+```{r}
+#basic_strict & sub_strict = T; max_person_effect) 80.4
+#basic_strict & sub_strict = T; min_person_effect) 45
+#basic_strict & sub_strict = F; max_person_effect) NA
+#basic_strict & sub_strict = F; min_person_effect) NA
+#basic_strict = T & sub_strict = F; max_person_effect) 212.707
+#basic_strict = T & sub_strict = F; min_person_effect) 1185.991
+#basic_strict = F & sub_strict = T; max_person_effect)  126.51
+#basic_strict  = F & sub_strict = T; min_person_effect) NA
 
-welch_t_test(d1, d2, s1, s2, n1, n2)
+min_E6_n = 45 + (.25  * 45)
+max_E6_n = 126.51+ (.25 * 126.51)
 ```
 
-### Overall power analysis (GLM)
-Suppose
-```{r exp6_power, eval = F}
-# estimate effect size of E6
-fixed.effects.turk.goodStim = rma(d, c(.01, .01),
-                                  data = all.es[6:7,], method = "FE")$b # exp 4 and 5
-fixed.effects.turk.badStim = rma(d, var.r,
-                                  data = all.es[3:4,], method = "FE")$b # exp 1 and 2
-fixed.effects.lab.badStim = all.es[5,"d"]
-personEffect = fixed.effects.lab.badStim - fixed.effects.turk.badStim 
-exp6_es = (fixed.effects.lab.badStim + personEffect)[1]
+Depending on the criteria used, we would need somewhere between 45 - 1186 participants to detect a person effect. Assuming 25% data loss (based on Exp. 3 experiments), we would need approximatiely 60-160 participants. Under the criteria reported in the paper ("liberal"; basic_strict = F & sub_strict = T), we would need approximately 160 participants, again assuming 25% data loss. 
 
-# convert es E6 to proportions and then make each observation a row
-# Note: I got props from just messing around with propes function using exp6_es
-learner_prop_basic = .28
-teacher_prop_basic = .1
-learner_prop_sub = 1 - learner_prop_basic 
-teacher_prop_sub = 1 - teacher_prop_basic
-
-d.goodStim.lab.estimated = data.frame(matrix(ncol = 0, nrow = 200))
-d.goodStim.lab.estimated$Answer.sample = rep("teacher",100)
-d.goodStim.lab.estimated$Answer.sample[101:200] = rep("learner",100)
-d.goodStim.lab.estimated$w.ans.cat = "sub"
-d.goodStim.lab.estimated$w.ans.cat[1:(teacher_prop_basic*100)] = "basic"
-d.goodStim.lab.estimated$w.ans.cat[101:(100+(learner_prop_basic*100))] = "basic"
-d.goodStim.lab.estimated$exp = "exp6"
-
-# E4 and E5 data with each observation a row
-d.goodStim.turk = rbind(t3.f, t4.f)[,c("w.ans.cat", "Answer.sample")]
-d.goodStim.turk$exp = "exp4and5"
-
-# run power simulation
-prop_sig_ps = numeric(0)
-for (n in seq(5,1000,5)){
-  #print(n)
-  ps = numeric(0)
-  
-  for (s in 1:100){
-    
-      # get ex6 sampled data
-      ex6.estimated = sample_n(d.goodStim.lab.estimated, n, replace = T)
-      
-      # bind two data sets together, distinguished by exp value
-      d_both = rbind(ex6.estimated, d.goodStim.turk)
-      d_both = colwise(as.factor)(d_both)
-
-      # run model and get p value
-      m = tidy(glm(w.ans.cat ~ Answer.sample * exp, d_both, family = "binomial"))
-      if (dim(m)[1] > 3) {
-         ps[s] = m[m$term == "Answer.sampleteacher:expexp6", "p.value"] 
-      } else {
-         ps[s] = "NA"
-      }
-  }
-  prop_sig_ps[n] = length(which(ps < .05))/length(ps)
-}
-
-qplot(1:n, prop_sig_ps, xlab = "n")
-
-# just plot proportions
-exp4_5props = prop.table(table(d_both)[,,1],1) %>%
-            melt() %>%
-            mutate(exp = "Exp. 4 and 5")
-
-
-both_props = prop.table(table(d_both)[,,2],1) %>%
-            melt() %>%
-            mutate(exp = "Exp. 6 estimated") %>%
-            rbind(exp4_5props)
-
-both_props %>%
-  ggplot(aes(x = w.ans.cat, y = value, 
-                             fill = Answer.sample)) +
-  geom_bar(stat = "identity", 
-           position = position_dodge()) +
-  facet_grid(. ~ exp) +
-  ylim(0, 1) +
-  ylab("Prop. Participants") +
-  xlab("Generalization Pattern") +
-  themeML + 
-  scale_fill_brewer(name = "Sampling\nCondition", 
-                    palette = "Set1") 
-
-# flip learner and teacher to debug
-exp4and5.flipped = d_both %>%
-                  filter(exp == "exp4and5")%>%
-                  mutate(Answer.sample, 
-                         Answer.sample = revalue(Answer.sample, 
-                                                   c("learner" = "teacher",
-                                                     "teacher"= "learner")))
-
-d_both2 = rbind(ex6.estimated, exp4and5.flipped)
-exp4_5props = prop.table(table(d_both2)[,,1],1) %>%
-            melt() %>%
-            mutate(exp = "Exp. 4 and 5")
-
-both_props = prop.table(table(d_both2)[,,2],1) %>%
-            melt() %>%
-            mutate(exp = "Exp. 6 estimated") %>%
-            rbind(exp4_5props)
-
-both_props %>%
-  ggplot(aes(x = w.ans.cat, y = value, 
-                             fill = Answer.sample)) +
-  geom_bar(stat = "identity", 
-           position = position_dodge()) +
-  facet_grid(. ~ exp) +
-  ylim(0, 1) +
-  ylab("Prop. Participants") +
-  xlab("Generalization Pattern") +
-  themeML + 
-  scale_fill_brewer(name = "Sampling\nCondition", 
-                    palette = "Set1") 
-
-d_both2 = colwise(as.factor)(d_both2)
-tidy(glm(w.ans.cat ~ Answer.sample * exp, d_both2, family = "binomial"))
-
-```
 ### Pattern of "other" responses
 
 ```{r}
