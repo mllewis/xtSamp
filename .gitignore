@@ -5,9 +5,10 @@ xt_2007b_replication_old/
 analysis/analysis_cache/
 analysis/analysis_files/
 
-
 data/non-anonymized/
 experimental_materials/E5_online/auth.json
+
+writeup/xtSampRep.log
 
 
 *.DS_Store

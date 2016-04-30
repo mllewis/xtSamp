@@ -1,5 +1,5 @@
-Exclusion criteria,label in Main Text,E1 (p-value),E2,E3,E4,E5,overall d,overall CI
-S-consistent; B-inconsistent,"""liberal""",0.43,0.34,0.48,0.01,<.01,0.53,
-S-consistent; B-consistent,"""strict""",0.78,0.79,0.42,0.04,<.01,0.51,
-S-inconsistent; B-inconsistent,,0.17,0.22,0.65,0.005,<.01,0.55,
-S-inconsistent;B-consistent,,0.44,0.63,0.57,0.02,<.01,0.53,
+Exclusion criteria,label in Main Text,E1 (p-value),E2,E3,E4,E5,overall d
+S-consistent; B-inconsistent,"""liberal""",0.43,0.34,0.48,0.01,<.01,0.53
+S-consistent; B-consistent,"""strict""",0.78,0.79,0.42,0.04,<.01,0.51
+S-inconsistent; B-inconsistent,,0.17,0.22,0.65,0.005,<.01,0.55
+S-inconsistent;B-consistent,,0.44,0.63,0.57,0.02,<.01,0.53
