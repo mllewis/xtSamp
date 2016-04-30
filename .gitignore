@@ -9,6 +9,7 @@ data/non-anonymized/
 experimental_materials/E5_online/auth.json
 
 writeup/xtSampRep.log
+writeup/journal-correspondence/xtSamp-cover.log
 
 
 *.DS_Store
