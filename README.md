@@ -1,4 +1,6 @@
-Replication of Xu and Tenenbaum, 2007b (Lewis & Frank, under review)
+
+#### Lewis, M. & Frank, M. C. (in press). Understanding the effect of social context on learning: A replication of Xu and Tenenbaum (2007b). *Journal of Experimental Psychology: General.*
+
 -----
 
 Analysis, data, stimuli, and writeup. 
