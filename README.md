@@ -1,5 +1,5 @@
 
-#### Lewis, M. & Frank, M. C. (in press). Understanding the effect of social context on learning: A replication of Xu and Tenenbaum (2007b). *Journal of Experimental Psychology: General.*
+#### Lewis, M. & Frank, M. C. (2016). Understanding the effect of social context on learning: A replication of Xu and Tenenbaum (2007b). *Journal of Experimental Psychology: General,* 145(9), e72– e80.
 
 -----
 
